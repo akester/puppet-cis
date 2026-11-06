@@ -1,0 +1,100 @@
+# CIS coverage and deviations
+
+Reference: **CIS Debian Linux 13 Benchmark v1.1.0**. Sections are listed by
+number and title only; see the benchmark itself for the recommendation text.
+
+Target profile: _TODO: Level 1 Server, Level 2 Server, or L1 plus selected L2._
+
+## Status key
+
+| Status | Meaning |
+|---|---|
+| Enforced | Puppet manages it (`baseline::*`). |
+| Monitored | Wazuh SCA check only; Puppet does not change it. |
+| Replaced | The intent is met by a different control (named in the notes). |
+| N/A | Doesn't apply to this fleet. |
+| Omitted | Deliberately not implemented. Needs a rationale below. |
+| Partial | Some recommendations in the section are implemented, others deviate. |
+| Planned / Undecided | Not implemented yet / no decision yet. |
+
+Statuses marked *(proposed)* come from the migration brief and haven't been
+confirmed yet.
+
+## Section overview
+
+| CIS | Section | Status | Notes |
+|---|---|---|---|
+| 1.1.1 | Filesystem kernel modules | Planned → Enforced | Parity with os_hardening's blacklist; usb-storage TBD. |
+| 1.1.2 | Filesystem partitions | Partial *(proposed)* | Partitioning is done at install time; Puppet manages mount options only. |
+| 1.2.1 | Package repositories | Undecided | Hosts use the apt.kester.cloud mirror. |
+| 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
+| 1.3.1 | AppArmor | Monitored *(proposed)* | Enabled by default on trixie; SCA confirms it stays that way. |
+| 1.4.1 | Bootloader password | Undecided | Probably not wanted on VMs; maybe on physical hosts. |
+| 1.4.2 | Bootloader config access | Planned → Enforced | |
+| 1.5 | Additional process hardening | Planned → Enforced | sysctls, core dumps, systemd-coredump. |
+| 1.6 | Command line warning banners | Planned | |
+| 1.7 | GNOME Display Manager | N/A *(proposed)* | Headless servers. |
+| 2.1 | Server services | Partial *(proposed)* | Some hosts intentionally run DHCP, NFS, Samba, web, and NTP services; per-role exceptions. |
+| 2.2 | Client services | Planned → Enforced | |
+| 2.3 | Time synchronization | Planned | Must not conflict with the public NTP server's config. |
+| 2.4 | Job schedulers (cron, at) | Planned → Enforced | Parity with os_hardening. |
+| 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
+| 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
+| 3.2 | Network kernel modules | Planned → Enforced | |
+| 3.3 | Network kernel parameters | Partial *(proposed)* | K3s nodes need forwarding and possibly loose `rp_filter`. |
+| 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
+| 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
+| 5.2 | Privilege escalation (sudo, su) | Planned | |
+| 5.3 | PAM | Planned | `common-*` files are hand-edited; `pam-auth-update` profiles (5.3.2) may be replaced by managed files. |
+| 5.4 | User accounts and environment | Planned | |
+| 6.1 | System logging (journald, rsyslog, log files) | Planned | |
+| 6.2 | System auditing (auditd) | Replaced | Wazuh. _TODO: will auditd rules still be deployed as a Wazuh data source?_ |
+| 6.3 | Integrity checking (AIDE) | Replaced | Wazuh file integrity monitoring. |
+| 7.1 | System file and directory access | Partial *(proposed)* | Identity-file permissions enforced; world-writable, unowned, and SUID/SGID review monitored by SCA. |
+| 7.2 | Local user and group settings | Monitored *(proposed)* | Wazuh SCA checks; home directory permissions may be enforced. |
+
+## Rule-level deviations
+
+Individual recommendations that depart from CIS inside a section that's
+otherwise enforced (a different value, a per-role exception, and so on).
+
+| CIS | Recommendation | CIS expects | Baseline does | Rationale |
+|---|---|---|---|---|
+| _e.g. 3.3.1.x_ | _IPv4 forwarding_ | _disabled_ | _enabled on K3s nodes_ | _see below_ |
+
+## Rationale
+
+One subsection for each Replaced, N/A, Omitted, or Partial entry above, so
+each departure has its reasoning written down.
+
+### 1.1.2 Filesystem partitions
+
+_TODO_
+
+### 1.7 GNOME Display Manager
+
+_TODO_
+
+### 2.1 Server services
+
+_TODO_
+
+### 3.3 Network kernel parameters (K3s)
+
+_TODO_
+
+### 4.1 Host firewall: firewalld instead of ufw
+
+_TODO_
+
+### 6.2 System auditing: Wazuh instead of the CIS auditd rule set
+
+_TODO_
+
+### 6.3 Integrity checking: Wazuh FIM instead of AIDE
+
+_TODO_
+
+### 7.1 / 7.2 Report-only checks
+
+_TODO_

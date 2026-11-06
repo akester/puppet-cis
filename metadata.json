@@ -1,0 +1,30 @@
+{
+  "name": "akester-baseline",
+  "version": "0.1.0",
+  "author": "Andrew Kester",
+  "summary": "OS hardening baseline for Debian/Ubuntu, aligned with the CIS Debian Linux 13 Benchmark",
+  "license": "Apache-2.0",
+  "source": "https://gitlab.kester.cloud/infra/puppet-cis",
+  "project_page": "https://gitlab.kester.cloud/infra/puppet-cis",
+  "issues_url": "https://gitlab.kester.cloud/infra/puppet-cis/-/issues",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 9.0.0 < 10.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "13"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "openvox",
+      "version_requirement": ">= 8.0.0 < 10.0.0"
+    }
+  ]
+}

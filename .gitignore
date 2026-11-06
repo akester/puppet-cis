@@ -1,0 +1,18 @@
+# Licensed CIS material and local working notes; never commit.
+/ref/
+
+/pkg/
+/Gemfile.lock
+/Gemfile.local
+/vendor/
+/.vendor/
+/.bundle/
+/spec/fixtures/manifests/
+/spec/fixtures/modules/
+/coverage/
+/log/
+/.yardoc/
+/doc/
+.*.sw?
+bolt-debug.log
+.rerun.json

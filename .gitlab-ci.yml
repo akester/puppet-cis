@@ -1,0 +1,24 @@
+stages:
+  - test
+
+variables:
+  # akester/puppet sets no locale; without this Ruby reads files as US-ASCII
+  # and metadata-json-lint crashes.
+  LANG: C.UTF-8
+  BUNDLE_PATH: vendor/bundle
+  BUNDLE_WITHOUT: development:system_tests:release
+
+test:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/akester/puppet
+  parallel:
+    matrix:
+      - OPENVOX_GEM_VERSION: ["~> 8.0", "~> 9.0"]
+  cache:
+    key: gems-openvox-${CI_NODE_INDEX}
+    paths:
+      - vendor/bundle
+  before_script:
+    - bundle install --jobs "$(nproc)"
+  script:
+    - bundle exec rake test
