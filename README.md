@@ -33,7 +33,7 @@ In the Bolt project Puppetfile:
 
 ```ruby
 mod 'baseline',
-  git: 'https://gitlab.kester.cloud/infra/puppet-cis.git',
+  git: 'https://github.com/akester/puppet-cis.git',
   ref: 'main'
 ```
 
@@ -93,3 +93,9 @@ This project is not affiliated with or endorsed by CIS.
 Parts of this repository, including code, tests, CI configuration, and
 documentation, were written with the help of generative AI (Anthropic's Claude,
 via Claude Code). Everything is human reviewed before commit and release.
+
+## Repository Mirror
+
+The public GitHub repository is a mirror of my local Git repository.  Issues and
+merge requests are tracked from the public repo, but know that things like CI
+tests are only run locally.
