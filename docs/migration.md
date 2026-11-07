@@ -30,7 +30,9 @@ whenever a ported feature leaves something behind that os_hardening created.
       Debian 13 loads that file last (via `/etc/sysctl.d/99-sysctl.conf`), so
       stale values there override the baseline drop-in at boot. Check with
       `systemd-analyze cat-config sysctl.d` and confirm with `sysctl -a` after
-      a reboot.
+      a reboot. Once removed, `tcp_timestamps`, `arp_ignore`, `arp_announce`
+      and the ICMP rate limits go back to kernel defaults (see "Not carried
+      over" in [3-network.md](controls/3-network.md)).
 - [ ] **PAM:** remove `/usr/share/pam-configs/tally2` (pam_tally2 no longer
       exists; see the migration brief §2).
 

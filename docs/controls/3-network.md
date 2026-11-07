@@ -65,9 +65,9 @@ value. On trixie, `linux-sysctl-defaults` ships
 `/usr/lib/sysctl.d/50-default.conf` with `net.ipv4.conf.*.rp_filter = 2`, and
 systemd re-applies it to each new interface. So interfaces stay in loose mode
 even with `all` set to 1. The CIS check only looks at `all` and `default`, so it passes either way.
-This is the same behavior as under os_hardening; whether to force strict mode
-per interface is still open. Hosts with asymmetric routing set
-`baseline::sysctl::rp_filter: 2`.
+This is the same behavior as under os_hardening. Tested on a K3s node with the
+default (`1`): no problems. Forcing strict mode per interface is parked for
+now. Hosts with asymmetric routing set `baseline::sysctl::rp_filter: 2`.
 
 ### log_martians follows forwarding (hl-sysctl-023, 024)
 
@@ -90,3 +90,20 @@ Keeps TIME_WAIT sockets alive when a reset arrives, instead of closing them
 early (TIME-WAIT assassination, RFC 1337). The security gain is small and the
 cost is negligible. It's kept because the fleet already runs it under
 os_hardening, so dropping it would be a behavior change for no benefit.
+
+### Not carried over from os_hardening
+
+os_hardening also set these on every host. They aren't in CIS and the
+baseline leaves them at the kernel default. They stay in effect until the old
+`/etc/sysctl.conf` entries are removed (see [migration.md](../migration.md)).
+
+| Setting | os_hardening | Kernel default | Why dropped |
+|---|---|---|---|
+| `net.ipv4.tcp_timestamps` | `0` | `1` | Disabling hurts TCP performance and PAWS protection; the uptime leak it guarded against is long fixed. |
+| `net.ipv4.conf.{all,default}.arp_ignore` | `1` | `0` | Can break VIPs and load balancers (K3s, keepalived). Opt-in if ever needed. |
+| `net.ipv4.conf.{all,default}.arp_announce` | `2` | `0` | Same as `arp_ignore`. |
+| `net.ipv4.conf.{all,default}.shared_media` | `1` | `1` | Already the default. |
+| `net.ipv4.icmp_ratelimit` | `100` | `1000` | Tuning, not hardening. |
+| `net.ipv4.icmp_ratemask` | `88089` | `6168` | Tuning, not hardening. |
+| `net.ipv6.conf.all.disable_ipv6` | `0` | `0` | IPv6 status is CIS 3.1.1, handled separately. |
+
