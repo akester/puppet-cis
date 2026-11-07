@@ -1,0 +1,2 @@
+---
+baseline::sysctl::ptrace_scope: 1

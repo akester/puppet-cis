@@ -1,0 +1,9 @@
+---
+# Test-only Hiera. A spec selects a data file by setting the `hiera_case` fact.
+version: 5
+defaults:
+  datadir: data
+  data_hash: yaml_data
+hierarchy:
+  - name: Spec case
+    path: '%{facts.hiera_case}.yaml'

@@ -4,3 +4,9 @@ fixtures:
     stdlib:
       repo: puppetlabs/stdlib
       ref: 9.7.0
+    augeasproviders_core:
+      repo: puppet/augeasproviders_core
+      ref: 5.0.0
+    augeasproviders_sysctl:
+      repo: puppet/augeasproviders_sysctl
+      ref: 4.1.0
