@@ -1,0 +1,5 @@
+---
+baseline::sysctl::ipv4_forwarding: true
+baseline::sysctl::ipv6_forwarding: true
+baseline::sysctl::rp_filter: 2
+baseline::sysctl::log_martians: false

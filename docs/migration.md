@@ -12,6 +12,18 @@ whenever a ported feature leaves something behind that os_hardening created.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
       os_hardening's `system_environment => 'lxc'`).
 
+### Hiera key mapping
+
+| os_hardening | baseline | Notes |
+|---|---|---|
+| `enable_ipv4_forwarding` | `baseline::sysctl::ipv4_forwarding` | Per-node; about 22 nodes. |
+| `enable_ipv6_forwarding` | `baseline::sysctl::ipv6_forwarding` | Not set anywhere today. |
+| `enable_log_martians` | `baseline::sysctl::log_martians` | `false` in `common.yaml`. |
+| `manage_ipv6` | `baseline::sysctl::manage_ipv6` | Baseline only manages 3.3.2; it never disables IPv6. |
+| `enable_ipv6` | — | Dropped. IPv6 status is CIS 3.1.1, not ported yet. |
+| `enable_rpfilter`, `rpfilter_loose` | `baseline::sysctl::rp_filter` (1 or 2) | Not set anywhere today. |
+| `system_environment: lxc` | `baseline::manage_sysctl: false` | |
+
 ## After the first baseline run
 
 - [ ] **sysctl:** remove the entries os_hardening wrote to `/etc/sysctl.conf`.

@@ -35,7 +35,7 @@ confirmed yet.
 | 1.3.1 | AppArmor | Monitored *(proposed)* | Enabled by default on trixie; SCA confirms it stays that way. |
 | 1.4.1 | Bootloader password | Undecided | Probably not wanted on VMs; maybe on physical hosts. |
 | 1.4.2 | Bootloader config access | Planned → Enforced | |
-| 1.5 | Additional process hardening | Planned → Enforced | sysctls, core dumps, systemd-coredump. |
+| 1.5 | Additional process hardening | Partial | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced. Planned: prelink, error reporting, core dump limits, systemd-coredump. |
 | 1.6 | Command line warning banners | Planned | |
 | 1.7 | GNOME Display Manager | N/A *(proposed)* | Headless servers. |
 | 2.1 | Server services | Partial *(proposed)* | Some hosts intentionally run DHCP, NFS, Samba, web, and NTP services; per-role exceptions. |
@@ -45,7 +45,7 @@ confirmed yet.
 | 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
 | 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
 | 3.2 | Network kernel modules | Planned → Enforced | |
-| 3.3 | Network kernel parameters | Partial *(proposed)* | K3s nodes need forwarding and possibly loose `rp_filter`. |
+| 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding on container hosts, `log_martians` off fleet-wide; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
 | 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
 | 5.2 | Privilege escalation (sudo, su) | Planned | |
@@ -64,7 +64,8 @@ otherwise enforced (a different value, a per-role exception, and so on).
 
 | CIS | Recommendation | CIS expects | Baseline does | Rationale |
 |---|---|---|---|---|
-| _e.g. 3.3.1.x_ | _IPv4 forwarding_ | _disabled_ | _enabled on K3s nodes_ | _see below_ |
+| 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
+| 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` fleet-wide (for now) | [3-network.md](controls/3-network.md#deviations) |
 
 ## Rationale
 
@@ -83,9 +84,9 @@ _TODO_
 
 _TODO_
 
-### 3.3 Network kernel parameters (K3s)
+### 3.3 Network kernel parameters
 
-_TODO_
+See the deviations in [3-network.md](controls/3-network.md#deviations).
 
 ### 4.1 Host firewall: firewalld instead of ufw
 
