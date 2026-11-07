@@ -3,7 +3,11 @@
 Reference: **CIS Debian Linux 13 Benchmark v1.1.0**. Sections are listed by
 number and title only; see the benchmark itself for the recommendation text.
 
-Target profile: _TODO: Level 1 Server, Level 2 Server, or L1 plus selected L2._
+Target profile: **Level 1 Server**. Level 2 recommendations are out of scope unless listed as an explicit addition.
+
+This page is the section-level overview. Individual controls, with their IDs,
+parameters, and deviations, are in [controls/](controls/README.md), one file
+per CIS chapter. Host migration steps are in [migration.md](migration.md).
 
 ## Status key
 
