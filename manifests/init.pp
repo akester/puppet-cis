@@ -7,12 +7,20 @@
 #   Manage kernel parameters (baseline::sysctl). Set false in containers
 #   (e.g. LXC), where the host owns the kernel.
 #
+# @param manage_kmod
+#   Manage the kernel module deny list (baseline::kmod).
+#
 # @example
 #   include baseline
 class baseline (
   Boolean $manage_sysctl = true,
+  Boolean $manage_kmod   = true,
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
+  }
+
+  if $manage_kmod {
+    contain baseline::kmod
   }
 }

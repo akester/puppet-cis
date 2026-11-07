@@ -41,6 +41,21 @@ false; CIS treats them as not applicable when IPv6 is disabled.
 | hl-sysctl-033 | 3.3.2.7 | `net.ipv6.conf.all.accept_ra` | `0` | Enforced | `baseline::manage_sysctl` | Already set by os_hardening. Safe fleet-wide: routers send no RAs and IPv6 servers are statically addressed, so no parameter. |
 | hl-sysctl-034 | 3.3.2.8 | `net.ipv6.conf.default.accept_ra` | `0` | Enforced | `baseline::manage_sysctl` |  |
 
+### Network kernel modules (3.2)
+
+All Level 1 Server. Same mechanism as the 1.1.1 modules; see
+[1-initial-setup.md](1-initial-setup.md#kernel-modules-111).
+
+| ID | CIS | Module | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-kmod-008 | 3.2.1 | `atm` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| hl-kmod-009 | 3.2.2 | `can` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| hl-kmod-010 | 3.2.3 | `dccp` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| hl-kmod-011 | 3.2.4 | `rds` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| hl-kmod-012 | 3.2.5 | `sctp` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| hl-kmod-013 | 3.2.6 | `tipc` | Not loadable | Enforced | `baseline::manage_kmod` |  |
+| — | 3.2.7 | Unneeded network protocol modules | — | Undecided | — | Manual review in CIS; no fixed list. |
+
 ## Deviations
 
 ### Forwarding on container hosts and K3s nodes (hl-sysctl-008..010, 027, 028)

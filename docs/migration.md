@@ -9,6 +9,15 @@ whenever a ported feature leaves something behind that os_hardening created.
       instead of `os_hardening`; never both).
 - [ ] Rename the node's Hiera keys from `os_hardening::*` to the matching
       `baseline::*` parameters.
+- [ ] **NFS servers:** set `baseline::kmod::allow: ['nfsd']` in the node's
+      Hiera *before* the switch, or the NFS server won't start after the next
+      reboot. Only a few hosts; check each one that exports NFS
+      (`systemctl is-active nfs-server`).
+- [ ] Kernel modules: set `baseline::kmod::allow` on hosts that need another
+      module the baseline denies: `usb-storage` for USB
+      disks, `cifs` for SMB mounts, `xfs`/`btrfs` for any such volume. Check
+      the Puppet log for "not denying mounted filesystem modules" after the
+      first run.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
       os_hardening's `system_environment => 'lxc'`).
 
@@ -23,6 +32,7 @@ whenever a ported feature leaves something behind that os_hardening created.
 | `enable_ipv6` | — | Dropped. IPv6 status is CIS 3.1.1, not ported yet. |
 | `enable_rpfilter`, `rpfilter_loose` | `baseline::sysctl::rp_filter` (1 or 2) | Not set anywhere today. |
 | `system_environment: lxc` | `baseline::manage_sysctl: false` | |
+| `disable_filesystems` | — | Dropped; the list is fixed to CIS Level 1. Use `baseline::kmod::allow` to exempt. |
 
 ## After the first baseline run
 
@@ -33,6 +43,8 @@ whenever a ported feature leaves something behind that os_hardening created.
       a reboot. Once removed, `tcp_timestamps`, `arp_ignore`, `arp_announce`
       and the ICMP rate limits go back to kernel defaults (see "Not carried
       over" in [3-network.md](controls/3-network.md)).
+- [ ] **Kernel modules:** remove os_hardening's `/etc/modprobe.d/dev-sec.conf`
+      (handled in the control repo, not by the baseline).
 - [ ] **PAM:** remove `/usr/share/pam-configs/tally2` (pam_tally2 no longer
       exists; see the migration brief §2).
 

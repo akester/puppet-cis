@@ -9,11 +9,18 @@ describe 'baseline' do
 
       it { is_expected.to compile.with_all_deps }
       it { is_expected.to contain_class('baseline::sysctl') }
+      it { is_expected.to contain_class('baseline::kmod') }
 
       context 'with manage_sysctl => false' do
         let(:params) { { manage_sysctl: false } }
 
         it { is_expected.not_to contain_class('baseline::sysctl') }
+      end
+
+      context 'with manage_kmod => false' do
+        let(:params) { { manage_kmod: false } }
+
+        it { is_expected.not_to contain_class('baseline::kmod') }
       end
     end
   end

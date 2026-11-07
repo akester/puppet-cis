@@ -1,0 +1,7 @@
+<%- | Array[String[1]] $modules | -%>
+# Managed by Puppet (baseline::kmod). Local changes will be overwritten.
+<% $modules.each |$module| { -%>
+
+install <%= $module %> /bin/false
+blacklist <%= $module %>
+<% } -%>

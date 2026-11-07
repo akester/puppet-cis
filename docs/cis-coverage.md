@@ -28,7 +28,7 @@ confirmed yet.
 
 | CIS | Section | Status | Notes |
 |---|---|---|---|
-| 1.1.1 | Filesystem kernel modules | Planned → Enforced | Parity with os_hardening's blacklist; usb-storage TBD. |
+| 1.1.1 | Filesystem kernel modules | Enforced, with exceptions | Level 1 rules enforced, including the 1.1.1.11 catch-all; per-host `allow`. `overlay` (Level 2) stays loadable for containers. |
 | 1.1.2 | Filesystem partitions | Partial *(proposed)* | Partitioning is done at install time; Puppet manages mount options only. |
 | 1.2.1 | Package repositories | Undecided | Hosts use the apt.kester.cloud mirror. |
 | 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
@@ -44,7 +44,7 @@ confirmed yet.
 | 2.4 | Job schedulers (cron, at) | Planned → Enforced | Parity with os_hardening. |
 | 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
 | 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
-| 3.2 | Network kernel modules | Planned → Enforced | |
+| 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6; 3.2.7 (manual review) undecided. |
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
 | 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
@@ -64,6 +64,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 
 | CIS | Recommendation | CIS expects | Baseline does | Rationale |
 |---|---|---|---|---|
+| 1.1.1.11 | Unused filesystem modules | `squashfs` not loadable | `squashfs` loadable fleet-wide; `nfsd` allowed on NFS servers | [1-initial-setup.md](controls/1-initial-setup.md#deviations) |
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 

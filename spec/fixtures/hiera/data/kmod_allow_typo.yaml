@@ -1,0 +1,3 @@
+---
+baseline::kmod::allow:
+  - usb_storage
