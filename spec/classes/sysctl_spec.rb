@@ -40,6 +40,7 @@ SYSCTL_DEFAULTS = {
   'hl-sysctl-034' => ['net.ipv6.conf.default.accept_ra', '0', 'ignores router advertisements on new interfaces'],
   'hl-sysctl-035' => ['kernel.sysrq', '0', 'disables the magic SysRq key'],
   'hl-sysctl-036' => ['net.ipv4.tcp_rfc1337', '1', 'protects TIME_WAIT sockets from RST assassination'],
+  'hl-sysctl-037' => ['kernel.apparmor_restrict_unprivileged_unconfined', '1', 'stops unconfined users switching AppArmor profiles'],
 }.freeze
 
 describe 'baseline::sysctl' do

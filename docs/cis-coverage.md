@@ -32,7 +32,7 @@ confirmed yet.
 | 1.1.2 | Filesystem partitions | Partial *(proposed)* | Partitioning is done at install time; Puppet manages mount options only. |
 | 1.2.1 | Package repositories | Undecided | Hosts use the apt.kester.cloud mirror. |
 | 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
-| 1.3.1 | AppArmor | Monitored *(proposed)* | Enabled by default on trixie; SCA confirms it stays that way. |
+| 1.3.1 | AppArmor | Partial | 1.3.1.4 sysctl enforced. The rest *(proposed)* monitored: enabled by default on trixie; SCA confirms it stays that way. |
 | 1.4.1 | Bootloader password | Undecided | Probably not wanted on VMs; maybe on physical hosts. |
 | 1.4.2 | Bootloader config access | Planned → Enforced | |
 | 1.5 | Additional process hardening | Partial | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced. Planned: prelink, error reporting, core dump limits, systemd-coredump. |

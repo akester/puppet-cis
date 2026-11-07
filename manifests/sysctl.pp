@@ -48,14 +48,15 @@ class baseline::sysctl (
   $martians = bool2str(pick($log_martians, !$ipv4_forwarding), '1', '0')
 
   $kernel = {
-    'fs.protected_hardlinks'    => '1', # hl-sysctl-001, CIS 1.5.1
-    'fs.protected_symlinks'     => '1', # hl-sysctl-002, CIS 1.5.2
-    'kernel.yama.ptrace_scope'  => String($ptrace_scope), # hl-sysctl-003, CIS 1.5.3
-    'fs.suid_dumpable'          => '0', # hl-sysctl-004, CIS 1.5.4
-    'kernel.dmesg_restrict'     => '1', # hl-sysctl-005, CIS 1.5.5
-    'kernel.kptr_restrict'      => '1', # hl-sysctl-006, CIS 1.5.8
-    'kernel.randomize_va_space' => '2', # hl-sysctl-007, CIS 1.5.9
-    'kernel.sysrq'              => '0', # hl-sysctl-035, not CIS
+    'fs.protected_hardlinks'                           => '1', # hl-sysctl-001, CIS 1.5.1
+    'fs.protected_symlinks'                            => '1', # hl-sysctl-002, CIS 1.5.2
+    'kernel.yama.ptrace_scope'                         => String($ptrace_scope), # hl-sysctl-003, CIS 1.5.3
+    'fs.suid_dumpable'                                 => '0', # hl-sysctl-004, CIS 1.5.4
+    'kernel.dmesg_restrict'                            => '1', # hl-sysctl-005, CIS 1.5.5
+    'kernel.kptr_restrict'                             => '1', # hl-sysctl-006, CIS 1.5.8
+    'kernel.randomize_va_space'                        => '2', # hl-sysctl-007, CIS 1.5.9
+    'kernel.sysrq'                                     => '0', # hl-sysctl-035, not CIS
+    'kernel.apparmor_restrict_unprivileged_unconfined' => '1', # hl-sysctl-037, CIS 1.3.1.4
   }
 
   $ipv4 = {
