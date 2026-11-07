@@ -38,7 +38,7 @@ false; CIS treats them as not applicable when IPv6 is disabled.
 | hl-sysctl-030 | 3.3.2.4 | `net.ipv6.conf.default.accept_redirects` | `0` | Enforced | `baseline::manage_sysctl` | New relative to os_hardening. |
 | hl-sysctl-031 | 3.3.2.5 | `net.ipv6.conf.all.accept_source_route` | `0` | Enforced | `baseline::manage_sysctl` |  |
 | hl-sysctl-032 | 3.3.2.6 | `net.ipv6.conf.default.accept_source_route` | `0` | Enforced | `baseline::manage_sysctl` |  |
-| hl-sysctl-033 | 3.3.2.7 | `net.ipv6.conf.all.accept_ra` | `0` | Enforced | `baseline::manage_sysctl` | Already set by os_hardening; hosts need static IPv6 or DHCPv6. |
+| hl-sysctl-033 | 3.3.2.7 | `net.ipv6.conf.all.accept_ra` | `0` | Enforced | `baseline::manage_sysctl` | Already set by os_hardening. Safe fleet-wide: routers send no RAs and IPv6 servers are statically addressed, so no parameter. |
 | hl-sysctl-034 | 3.3.2.8 | `net.ipv6.conf.default.accept_ra` | `0` | Enforced | `baseline::manage_sysctl` |  |
 
 ## Deviations
