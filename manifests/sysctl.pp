@@ -21,6 +21,8 @@
 #
 # @param log_martians
 #   Log packets with impossible source addresses (hl-sysctl-023, 024).
+#   Defaults to the opposite of `ipv4_forwarding`: forwarding hosts see
+#   container and pod traffic that looks martian and would flood the log.
 #
 # @param manage_ipv6
 #   Manage the IPv6 parameters (hl-sysctl-027..034). Set false only on hosts
@@ -35,7 +37,7 @@ class baseline::sysctl (
   Integer[1, 2]        $ptrace_scope    = 2,
   Boolean              $ipv4_forwarding = false,
   Integer[1, 2]        $rp_filter       = 1,
-  Boolean              $log_martians    = true,
+  Optional[Boolean]    $log_martians    = undef,
   Boolean              $manage_ipv6     = true,
   Boolean              $ipv6_forwarding = false,
 ) {
@@ -43,7 +45,7 @@ class baseline::sysctl (
 
   $forward4 = bool2str($ipv4_forwarding, '1', '0')
   $forward6 = bool2str($ipv6_forwarding, '1', '0')
-  $martians = bool2str($log_martians, '1', '0')
+  $martians = bool2str(pick($log_martians, !$ipv4_forwarding), '1', '0')
 
   $kernel = {
     'fs.protected_hardlinks'    => '1', # hl-sysctl-001, CIS 1.5.1
@@ -53,6 +55,7 @@ class baseline::sysctl (
     'kernel.dmesg_restrict'     => '1', # hl-sysctl-005, CIS 1.5.5
     'kernel.kptr_restrict'      => '1', # hl-sysctl-006, CIS 1.5.8
     'kernel.randomize_va_space' => '2', # hl-sysctl-007, CIS 1.5.9
+    'kernel.sysrq'              => '0', # hl-sysctl-035, not CIS
   }
 
   $ipv4 = {
@@ -75,6 +78,7 @@ class baseline::sysctl (
     'net.ipv4.conf.default.log_martians'         => $martians, # hl-sysctl-024, CIS 3.3.1.17
     'net.ipv4.tcp_syncookies'                    => '1', # hl-sysctl-025, CIS 3.3.1.18
     'net.ipv4.conf.all.route_localnet'           => '0', # hl-sysctl-026, CIS 3.3.1.19
+    'net.ipv4.tcp_rfc1337'                       => '1', # hl-sysctl-036, not CIS
   }
 
   if $manage_ipv6 {

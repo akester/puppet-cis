@@ -38,6 +38,8 @@ SYSCTL_DEFAULTS = {
   'hl-sysctl-032' => ['net.ipv6.conf.default.accept_source_route', '0', 'rejects source-routed IPv6 packets on new interfaces'],
   'hl-sysctl-033' => ['net.ipv6.conf.all.accept_ra', '0', 'ignores router advertisements'],
   'hl-sysctl-034' => ['net.ipv6.conf.default.accept_ra', '0', 'ignores router advertisements on new interfaces'],
+  'hl-sysctl-035' => ['kernel.sysrq', '0', 'disables the magic SysRq key'],
+  'hl-sysctl-036' => ['net.ipv4.tcp_rfc1337', '1', 'protects TIME_WAIT sockets from RST assassination'],
 }.freeze
 
 describe 'baseline::sysctl' do
@@ -61,6 +63,30 @@ describe 'baseline::sysctl' do
 
         it 'hl-sysctl-003: allows tracing descendants' do
           is_expected.to contain_sysctl('kernel.yama.ptrace_scope').with_value('1')
+        end
+      end
+
+      context 'with ipv4_forwarding: true in Hiera' do
+        let(:facts) { os_facts.merge(hiera_case: 'forwarding') }
+
+        it 'hl-sysctl-008: enables IPv4 forwarding' do
+          is_expected.to contain_sysctl('net.ipv4.ip_forward').with_value('1')
+        end
+
+        it 'hl-sysctl-023: stops logging martians by default' do
+          is_expected.to contain_sysctl('net.ipv4.conf.all.log_martians').with_value('0')
+        end
+
+        it 'hl-sysctl-024: stops logging martians on new interfaces by default' do
+          is_expected.to contain_sysctl('net.ipv4.conf.default.log_martians').with_value('0')
+        end
+      end
+
+      context 'with ipv4_forwarding and log_martians both true in Hiera' do
+        let(:facts) { os_facts.merge(hiera_case: 'forwarding_martians') }
+
+        it 'hl-sysctl-023: logs martians when explicitly asked' do
+          is_expected.to contain_sysctl('net.ipv4.conf.all.log_martians').with_value('1')
         end
       end
 

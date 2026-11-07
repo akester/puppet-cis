@@ -45,7 +45,7 @@ confirmed yet.
 | 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
 | 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
 | 3.2 | Network kernel modules | Planned → Enforced | |
-| 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding on container hosts, `log_martians` off fleet-wide; see [3-network.md](controls/3-network.md). |
+| 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
 | 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
 | 5.2 | Privilege escalation (sudo, su) | Planned | |
@@ -65,7 +65,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | CIS | Recommendation | CIS expects | Baseline does | Rationale |
 |---|---|---|---|---|
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
-| 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` fleet-wide (for now) | [3-network.md](controls/3-network.md#deviations) |
+| 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 
 ## Rationale
 

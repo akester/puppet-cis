@@ -27,10 +27,11 @@ false; CIS treats them as not applicable when IPv6 is disabled.
 | hl-sysctl-020 | 3.3.1.13 | `net.ipv4.conf.default.rp_filter` | `1` | Enforced | `baseline::sysctl::rp_filter` (1–2) |  |
 | hl-sysctl-021 | 3.3.1.14 | `net.ipv4.conf.all.accept_source_route` | `0` | Enforced | `baseline::manage_sysctl` |  |
 | hl-sysctl-022 | 3.3.1.15 | `net.ipv4.conf.default.accept_source_route` | `0` | Enforced | `baseline::manage_sysctl` |  |
-| hl-sysctl-023 | 3.3.1.16 | `net.ipv4.conf.all.log_martians` | `1` | Enforced | `baseline::sysctl::log_martians` | Fleet sets `false`; see below. |
+| hl-sysctl-023 | 3.3.1.16 | `net.ipv4.conf.all.log_martians` | `1` | Enforced | `baseline::sysctl::log_martians` | `0` when `ipv4_forwarding` is on; see below. |
 | hl-sysctl-024 | 3.3.1.17 | `net.ipv4.conf.default.log_martians` | `1` | Enforced | `baseline::sysctl::log_martians` |  |
 | hl-sysctl-025 | 3.3.1.18 | `net.ipv4.tcp_syncookies` | `1` | Enforced | `baseline::manage_sysctl` |  |
 | hl-sysctl-026 | 3.3.1.19 | `net.ipv4.conf.all.route_localnet` | `0` | Enforced | `baseline::manage_sysctl` | New relative to os_hardening. |
+| hl-sysctl-036 | — | `net.ipv4.tcp_rfc1337` | `1` | Enforced | `baseline::manage_sysctl` | Not CIS. Carried over from os_hardening; see below. |
 | hl-sysctl-027 | 3.3.2.1 | `net.ipv6.conf.all.forwarding` | `0` | Enforced | `baseline::sysctl::ipv6_forwarding` |  |
 | hl-sysctl-028 | 3.3.2.2 | `net.ipv6.conf.default.forwarding` | `0` | Enforced | `baseline::sysctl::ipv6_forwarding` |  |
 | hl-sysctl-029 | 3.3.2.3 | `net.ipv6.conf.all.accept_redirects` | `0` | Enforced | `baseline::manage_sysctl` |  |
@@ -68,10 +69,24 @@ This is the same behavior as under os_hardening; whether to force strict mode
 per interface is still open. Hosts with asymmetric routing set
 `baseline::sysctl::rp_filter: 2`.
 
-### log_martians (hl-sysctl-023, 024)
+### log_martians follows forwarding (hl-sysctl-023, 024)
 
-The baseline defaults to CIS (`1`). The fleet's `common.yaml` turns it off
-(`enable_log_martians: false`), probably because of kernel log noise on
-container and multi-homed hosts. Until that's revisited, set
-`baseline::sysctl::log_martians: false` in `common.yaml` at the switch, and
-record it as a fleet-wide deviation.
+`log_martians` only logs; the kernel and rp_filter do the dropping. On
+forwarding hosts (Docker, K3s, runners), container and pod traffic regularly
+looks martian, so the kernel log and Wazuh would fill up with noise. On plain
+servers a martian is rare, so a log line there is worth looking at.
+
+So `baseline::sysctl::log_martians` defaults to the opposite of
+`ipv4_forwarding`: on (CIS) for normal hosts, off for forwarding hosts. Those
+hosts deviate from 3.3.1.16 and 3.3.1.17, which CIS already treats as out of
+scope for routers. Setting `log_martians` explicitly in Hiera overrides the
+default either way.
+
+This replaces the old fleet-wide `os_hardening::enable_log_martians: false`.
+
+### hl-sysctl-036: tcp_rfc1337 (not CIS)
+
+Keeps TIME_WAIT sockets alive when a reset arrives, instead of closing them
+early (TIME-WAIT assassination, RFC 1337). The security gain is small and the
+cost is negligible. It's kept because the fleet already runs it under
+os_hardening, so dropping it would be a behavior change for no benefit.

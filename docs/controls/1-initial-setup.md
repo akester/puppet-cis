@@ -14,6 +14,7 @@ section-level status is in [cis-coverage.md](../cis-coverage.md).
 | hl-sysctl-005 | 1.5.5 | `kernel.dmesg_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian kernel default; managed so it can't drift. |
 | hl-sysctl-006 | 1.5.8 | `kernel.kptr_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Hides `/proc/kallsyms` and similar addresses from users without `CAP_SYSLOG`. |
 | hl-sysctl-007 | 1.5.9 | `kernel.randomize_va_space` | `2` | Enforced | `baseline::manage_sysctl` | Already the kernel default. Carried over from os_hardening. |
+| hl-sysctl-035 | — | `kernel.sysrq` | `0` | Enforced | `baseline::manage_sysctl` | Not CIS. Debian ships `438`. Carried over from os_hardening; see below. |
 
 Sysctl controls are written to `/etc/sysctl.d/60-baseline.conf` and applied
 to the running kernel (`baseline::sysctl`). `manage_sysctl => false` turns
@@ -30,3 +31,11 @@ debugging inside Docker containers unless they run with
 applies to every container on it. Hosts that need non-root debugging set
 `baseline::sysctl::ptrace_scope: 1` in Hiera. `3` is not allowed because it
 can't be lowered again without a reboot.
+
+### hl-sysctl-035: kernel.sysrq 0 (not CIS)
+
+Turns off the magic SysRq key combinations, which can sync, remount
+read-only, kill tasks or reboot without a login. Anyone at a console can send
+them, including the Proxmox VM console, serial consoles and IPMI/BMC remote
+consoles. Root can still use `/proc/sysrq-trigger`, which this setting doesn't
+affect. The fleet already runs `0` under os_hardening.

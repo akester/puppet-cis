@@ -1,0 +1,3 @@
+---
+baseline::sysctl::ipv4_forwarding: true
+baseline::sysctl::log_martians: true
