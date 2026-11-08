@@ -7,7 +7,13 @@ section-level status is in [cis-coverage.md](../cis-coverage.md).
 
 | ID | CIS | Setting | Value | Status | Parameter | Notes |
 |---|---|---|---|---|---|---|
+| hl-apparmor-001 | 1.3.1.1 | `apparmor` package | installed | Enforced | `baseline::manage_apparmor` | Part of the default Debian 13 install. |
+| hl-apparmor-002 | 1.3.1.1 | `apparmor-utils` package | installed | Enforced | `baseline::manage_apparmor` | Not installed by default; the baseline adds it. |
+| — | 1.3.1.2 | AppArmor enabled at boot | — | Monitored | — | On by default in the Debian kernel; Wazuh SCA. |
+| — | 1.3.1.3 | All AppArmor profiles enforcing | — | Omitted | — | Level 2. |
 | hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. |
+| — | 1.4.1 | Bootloader password | — | Omitted | — | See below. |
+| hl-boot-001 | 1.4.2 | `/boot/grub/grub.cfg` ownership and mode | root:root `0600` | Enforced | `baseline::manage_bootloader` | Only where the file exists. update-grub resets the mode; the next run fixes it. |
 | hl-sysctl-001 | 1.5.1 | `fs.protected_hardlinks` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian default; managed so it can't drift. |
 | hl-sysctl-002 | 1.5.2 | `fs.protected_symlinks` | `1` | Enforced | `baseline::manage_sysctl` | **Level 2** in CIS; kept as an addition because it's the Debian default anyway. |
 | hl-sysctl-003 | 1.5.3 | `kernel.yama.ptrace_scope` | `2` | Enforced | `baseline::sysctl::ptrace_scope` (1–2) | Debian ships `0`. CIS accepts 1, 2 or 3; see below. |
@@ -138,6 +144,22 @@ puppetlabs/apt (included by the control repo on every Debian 13 host)
 already declares both directories, root-owned but without a mode, so the
 baseline can't declare them without a duplicate resource. The package ships
 them root:root `0755`, and the Wazuh check catches any drift.
+
+### 1.4.1: no bootloader password
+
+A GRUB password stops someone at the console from editing the boot entry,
+e.g. booting into single-user mode to get past access controls. It doesn't
+add much here:
+
+- **Physical hosts** are kept on site only, so console access already means
+  physical access.
+- **VMs** can only be reached at the console through the Proxmox control
+  plane. Someone who has compromised that doesn't need the bootloader: they
+  can mount the VM's disks directly or swap its boot media and read or change
+  anything on them.
+
+Omitted for now. Revisit if a host ends up somewhere with untrusted physical
+access.
 
 ### 1.1.2.1.4: /tmp is not mounted noexec
 

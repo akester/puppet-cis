@@ -14,15 +14,24 @@
 #   Manage the /tmp, /var/tmp and /dev/shm tmpfs mounts (baseline::mounts).
 #
 # @param manage_apt
-#   Manage ownership and mode of the apt key directories (baseline::apt).
+#   Manage apt key directory permissions and repository security settings
+#   (baseline::apt).
+#
+# @param manage_apparmor
+#   Install the AppArmor userspace packages (baseline::apparmor).
+#
+# @param manage_bootloader
+#   Manage ownership and mode of the GRUB config (baseline::bootloader).
 #
 # @example
 #   include baseline
 class baseline (
-  Boolean $manage_sysctl = true,
-  Boolean $manage_kmod   = true,
-  Boolean $manage_mounts = true,
-  Boolean $manage_apt    = true,
+  Boolean $manage_sysctl     = true,
+  Boolean $manage_kmod       = true,
+  Boolean $manage_mounts     = true,
+  Boolean $manage_apt        = true,
+  Boolean $manage_apparmor   = true,
+  Boolean $manage_bootloader = true,
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
@@ -38,5 +47,13 @@ class baseline (
 
   if $manage_apt {
     contain baseline::apt
+  }
+
+  if $manage_apparmor {
+    contain baseline::apparmor
+  }
+
+  if $manage_bootloader {
+    contain baseline::bootloader
   }
 }

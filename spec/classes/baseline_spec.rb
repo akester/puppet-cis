@@ -12,6 +12,8 @@ describe 'baseline' do
       it { is_expected.to contain_class('baseline::kmod') }
       it { is_expected.to contain_class('baseline::mounts') }
       it { is_expected.to contain_class('baseline::apt') }
+      it { is_expected.to contain_class('baseline::apparmor') }
+      it { is_expected.to contain_class('baseline::bootloader') }
 
       context 'with manage_sysctl => false' do
         let(:params) { { manage_sysctl: false } }
@@ -35,6 +37,18 @@ describe 'baseline' do
         let(:params) { { manage_apt: false } }
 
         it { is_expected.not_to contain_class('baseline::apt') }
+      end
+
+      context 'with manage_apparmor => false' do
+        let(:params) { { manage_apparmor: false } }
+
+        it { is_expected.not_to contain_class('baseline::apparmor') }
+      end
+
+      context 'with manage_bootloader => false' do
+        let(:params) { { manage_bootloader: false } }
+
+        it { is_expected.not_to contain_class('baseline::bootloader') }
       end
     end
   end

@@ -31,10 +31,10 @@ confirmed yet.
 | 1.1.1 | Filesystem kernel modules | Enforced, with exceptions | Level 1 rules enforced, including the 1.1.1.11 catch-all; per-host `allow`. `overlay` (Level 2) stays loadable for containers. |
 | 1.1.2 | Filesystem partitions | Partial | 1.1.2.1 (`/tmp`) enforced except `noexec`; 1.1.2.2 (`/dev/shm`) and 1.1.2.5 (`/var/tmp`, a tmpfs) enforced. 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7 (`/home`, `/var`, `/var/log`, `/var/log/audit`) N/A: on `/`, not separate partitions. |
 | 1.2.1 | Package repositories | Enforced, with monitored rules | Sources are managed in the control repo (apt.kester.cloud mirror), all with Signed-By (1.2.1.1). 1.2.1.2 omitted (Level 2). Key directory permissions enforced (1.2.1.4, 1.2.1.7); the directories puppetlabs/apt owns (1.2.1.5, 1.2.1.8), file permissions and https monitored (1.2.1.3, 1.2.1.6, 1.2.1.9–1.2.1.11). Repository security settings enforced (1.2.1.12–1.2.1.15). |
-| 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
-| 1.3.1 | AppArmor | Partial | 1.3.1.4 sysctl enforced. The rest *(proposed)* monitored: enabled by default on trixie; SCA confirms it stays that way. |
-| 1.4.1 | Bootloader password | Undecided | Probably not wanted on VMs; maybe on physical hosts. |
-| 1.4.2 | Bootloader config access | Planned → Enforced | |
+| 1.2.2 | Package updates | Replaced | unattended-upgrades, configured in the control repo (`base::unattended`) because its allow list covers site repositories. |
+| 1.3.1 | AppArmor | Enforced, with monitored rules | Packages (1.3.1.1) and the 1.3.1.4 sysctl enforced. 1.3.1.2 monitored: enabled by default on Debian 13. 1.3.1.3 omitted (Level 2). |
+| 1.4.1 | Bootloader password | Omitted | Physical hosts are on site only; on VMs a Proxmox control-plane compromise gets past it anyway. |
+| 1.4.2 | Bootloader config access | Enforced | `grub.cfg` root:root `0600` where it exists. |
 | 1.5 | Additional process hardening | Partial | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced. Planned: prelink, error reporting, core dump limits, systemd-coredump. |
 | 1.6 | Command line warning banners | Planned | |
 | 1.7 | GNOME Display Manager | N/A *(proposed)* | Headless servers. |
