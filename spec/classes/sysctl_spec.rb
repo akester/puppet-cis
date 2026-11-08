@@ -111,6 +111,26 @@ describe 'baseline::sysctl' do
         end
       end
 
+      context 'with Yama and AppArmor both active' do
+        let(:facts) { os_facts.merge(baseline_lsm: %w[lockdown capability landlock yama apparmor]) }
+
+        it { is_expected.to have_sysctl_resource_count(SYSCTL_DEFAULTS.size) }
+      end
+
+      context 'on a kernel without Yama or AppArmor (Raspberry Pi)' do
+        let(:facts) { os_facts.merge(baseline_lsm: %w[capability]) }
+
+        it 'hl-sysctl-003: skips kernel.yama.ptrace_scope' do
+          is_expected.not_to contain_sysctl('kernel.yama.ptrace_scope')
+        end
+
+        it 'hl-sysctl-037: skips kernel.apparmor_restrict_unprivileged_unconfined' do
+          is_expected.not_to contain_sysctl('kernel.apparmor_restrict_unprivileged_unconfined')
+        end
+
+        it { is_expected.to have_sysctl_resource_count(SYSCTL_DEFAULTS.size - 2) }
+      end
+
       context 'with manage_ipv6: false in Hiera' do
         let(:facts) { os_facts.merge(hiera_case: 'no_ipv6') }
 

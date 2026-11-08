@@ -107,7 +107,7 @@ written by `baseline::sysctl`, like the 1.5 ones.
 | hl-apparmor-002 | 1.3.1.1 | `apparmor-utils` package | installed | Enforced | `baseline::manage_apparmor` | Not installed by default; the baseline adds it. |
 | — | 1.3.1.2 | AppArmor enabled at boot | — | Monitored | — | On by default in the Debian kernel; Wazuh SCA. |
 | — | 1.3.1.3 | All AppArmor profiles enforcing | — | Omitted | — | Level 2. |
-| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. |
+| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. Skipped where AppArmor isn't active (Raspberry Pi kernel). |
 
 ### Bootloader (1.4)
 
@@ -133,7 +133,7 @@ dumps with two drop-ins: `/etc/security/limits.d/60-baseline.conf` and
 |---|---|---|---|---|---|---|
 | hl-sysctl-001 | 1.5.1 | `fs.protected_hardlinks` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian default; managed so it can't drift. |
 | hl-sysctl-002 | 1.5.2 | `fs.protected_symlinks` | `1` | Enforced | `baseline::manage_sysctl` | **Level 2** in CIS; kept as an addition because it's the Debian default anyway. |
-| hl-sysctl-003 | 1.5.3 | `kernel.yama.ptrace_scope` | `2` | Enforced | `baseline::sysctl::ptrace_scope` (1–2) | Debian ships `0`. CIS accepts 1, 2 or 3; see below. |
+| hl-sysctl-003 | 1.5.3 | `kernel.yama.ptrace_scope` | `2` | Enforced | `baseline::sysctl::ptrace_scope` (1–2) | Debian ships `0`. CIS accepts 1, 2 or 3; see below. Skipped where Yama isn't active (Raspberry Pi kernel). |
 | hl-sysctl-004 | 1.5.4 | `fs.suid_dumpable` | `0` | Enforced | `baseline::manage_sysctl` | Kernel default is `0`, but systemd-coredump's `50-coredump.conf` sets `2`; the baseline drop-in (`60-`) loads later and wins. Carried over from os_hardening. |
 | hl-sysctl-005 | 1.5.5 | `kernel.dmesg_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian kernel default; managed so it can't drift. |
 | hl-process-001 | 1.5.6 | `prelink` package | purged | Enforced | `baseline::manage_process` | No trixie package (apt doesn't know it); keeps it from coming back. |
@@ -253,6 +253,16 @@ debugging inside Docker containers unless they run with
 applies to every container on it. Hosts that need non-root debugging set
 `baseline::sysctl::ptrace_scope: 1` in Hiera. `3` is not allowed because it
 can't be lowered again without a reboot.
+
+### hl-sysctl-003, hl-sysctl-037: kernels without Yama or AppArmor
+
+Yama and AppArmor only register their sysctls while the security module is
+active. The Raspberry Pi kernel runs without them, so the keys don't exist
+and setting them fails. The `baseline_lsm` fact reads the active modules from
+`/sys/kernel/security/lsm`, and `baseline::sysctl` leaves out a key when its
+module isn't listed. Those hosts don't meet 1.5.3 or 1.3.1.4, and there's no
+setting that would fix that short of a kernel with the module enabled. If the
+fact is missing, both keys are managed as usual.
 
 ### hl-sysctl-035: kernel.sysrq 0 (not CIS)
 

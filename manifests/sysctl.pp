@@ -47,7 +47,7 @@ class baseline::sysctl (
   $forward6 = bool2str($ipv6_forwarding, '1', '0')
   $martians = bool2str(pick($log_martians, !$ipv4_forwarding), '1', '0')
 
-  $kernel = {
+  $kernel_all = {
     'fs.protected_hardlinks'                           => '1', # hl-sysctl-001, CIS 1.5.1
     'fs.protected_symlinks'                            => '1', # hl-sysctl-002, CIS 1.5.2
     'kernel.yama.ptrace_scope'                         => String($ptrace_scope), # hl-sysctl-003, CIS 1.5.3
@@ -57,6 +57,19 @@ class baseline::sysctl (
     'kernel.randomize_va_space'                        => '2', # hl-sysctl-007, CIS 1.5.9
     'kernel.sysrq'                                     => '0', # hl-sysctl-035, not CIS
     'kernel.apparmor_restrict_unprivileged_unconfined' => '1', # hl-sysctl-037, CIS 1.3.1.4
+  }
+
+  # Yama and AppArmor only register their sysctls while the security module is
+  # active, which it isn't on every kernel (e.g. the Raspberry Pi one). Skip
+  # those keys when the baseline_lsm fact says the module is off. Without the
+  # fact, manage them anyway.
+  $lsm = $facts['baseline_lsm']
+  $lsm_keys = {
+    'kernel.yama.ptrace_scope'                         => 'yama',
+    'kernel.apparmor_restrict_unprivileged_unconfined' => 'apparmor',
+  }
+  $kernel = $kernel_all.filter |$key, $_value| {
+    $lsm =~ Undef or !($key in $lsm_keys) or $lsm_keys[$key] in $lsm
   }
 
   $ipv4 = {

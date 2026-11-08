@@ -67,6 +67,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | 1.1.2.1.4 | `/tmp` noexec | `noexec` on `/tmp` | `/tmp` stays executable | apt scripts; [1-initial-setup.md](controls/1-initial-setup.md#11214-tmp-is-not-mounted-noexec) |
 | 1.1.1.11 | Unused filesystem modules | `squashfs` not loadable | `squashfs` loadable fleet-wide; `nfsd` allowed on NFS servers | [1-initial-setup.md](controls/1-initial-setup.md#deviations) |
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
+| 1.3.1.4, 1.5.3 | AppArmor and Yama sysctls | set | not set where the module isn't active | Raspberry Pi kernel; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-003-hl-sysctl-037-kernels-without-yama-or-apparmor) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 
 ## Rationale
