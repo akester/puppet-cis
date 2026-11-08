@@ -30,7 +30,7 @@ confirmed yet.
 |---|---|---|---|
 | 1.1.1 | Filesystem kernel modules | Enforced, with exceptions | Level 1 rules enforced, including the 1.1.1.11 catch-all; per-host `allow`. `overlay` (Level 2) stays loadable for containers. |
 | 1.1.2 | Filesystem partitions | Partial | 1.1.2.1 (`/tmp`) enforced except `noexec`; 1.1.2.2 (`/dev/shm`) and 1.1.2.5 (`/var/tmp`, a tmpfs) enforced. 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7 (`/home`, `/var`, `/var/log`, `/var/log/audit`) N/A: on `/`, not separate partitions. |
-| 1.2.1 | Package repositories | Undecided | Hosts use the apt.kester.cloud mirror. |
+| 1.2.1 | Package repositories | Enforced, with monitored rules | Sources are managed in the control repo (apt.kester.cloud mirror), all with Signed-By (1.2.1.1). 1.2.1.2 omitted (Level 2). Key directory permissions enforced (1.2.1.4, 1.2.1.7); the directories puppetlabs/apt owns (1.2.1.5, 1.2.1.8), file permissions and https monitored (1.2.1.3, 1.2.1.6, 1.2.1.9–1.2.1.11). Repository security settings enforced (1.2.1.12–1.2.1.15). |
 | 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
 | 1.3.1 | AppArmor | Partial | 1.3.1.4 sysctl enforced. The rest *(proposed)* monitored: enabled by default on trixie; SCA confirms it stays that way. |
 | 1.4.1 | Bootloader password | Undecided | Probably not wanted on VMs; maybe on physical hosts. |

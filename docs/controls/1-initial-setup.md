@@ -78,7 +78,33 @@ and `/dev/shm`, and mounts them (or remounts them when the options change).
 | — | 1.1.2.7.3 | `/var/log/audit` mount option | `nosuid` | N/A | — | Only applies to a separate `/var/log/audit`; see below. |
 | — | 1.1.2.7.4 | `/var/log/audit` mount option | `noexec` | N/A | — | Only applies to a separate `/var/log/audit`; see below. |
 
-## Deviations
+### Package repositories (1.2.1)
+
+Apt sources are site-specific and stay in the control repo (`base::apt_cache`
+for the distro sources, `apt::source` in each service module for the rest).
+The baseline doesn't manage them. `baseline::apt` sets ownership and mode on
+the key directories (not their contents) and writes the repository security
+settings to `/etc/apt/apt.conf.d/99-baseline`, read last so it overrides
+earlier drop-ins. `baseline::manage_apt => false` turns it off.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 1.2.1.1 | Sources use `Signed-By` | — | Replaced | — | Control repo: every Puppet-managed source sets `Signed-By`; see below. |
+| — | 1.2.1.2 | Weak dependencies | — | Omitted | — | Level 2. |
+| — | 1.2.1.3 | apt key file ownership and mode | root:root, `0644` or tighter | Monitored | — | Wazuh SCA. |
+| hl-apt-001 | 1.2.1.4 | `/etc/apt/trusted.gpg.d` ownership and mode | root:root `0755` | Enforced | `baseline::manage_apt` | Directory only. |
+| — | 1.2.1.5 | `/etc/apt/auth.conf.d` ownership and mode | root:root, `0755` or tighter | Monitored | — | puppetlabs/apt declares this directory; see below. |
+| — | 1.2.1.6 | Files in `/etc/apt/auth.conf.d` | root:root, `0640` or tighter | Monitored | — | Empty by default; Wazuh SCA. |
+| hl-apt-002 | 1.2.1.7 | `/usr/share/keyrings` ownership and mode | root:root `0755` | Enforced | `baseline::manage_apt` | Directory only. |
+| — | 1.2.1.8 | `/etc/apt/sources.list.d` ownership and mode | root:root, `0755` or tighter | Monitored | — | puppetlabs/apt declares this directory; see below. |
+| — | 1.2.1.9 | Files in `/etc/apt/sources.list.d` | root:root `0644` | Monitored | — | `apt::source` writes them root:root `0644`; Wazuh SCA. |
+| — | 1.2.1.10 | `sources.list` uses https | — | Monitored | — | `sources.list` is only a comment; Wazuh SCA. |
+| — | 1.2.1.11 | `sources.list.d` uses https | — | Monitored | — | Sources point at `https://apt.kester.cloud`; Wazuh SCA. |
+| hl-apt-003 | 1.2.1.12 | `Acquire::AllowInsecureRepositories` | `0` | Enforced | `baseline::manage_apt` | Already the apt default; set so it can't drift. |
+| hl-apt-004 | 1.2.1.13 | `Acquire::AllowWeakRepositories` | `0` | Enforced | `baseline::manage_apt` | Already the apt default. |
+| hl-apt-005 | 1.2.1.14 | `Acquire::AllowDowngradeToInsecureRepositories` | `0` | Enforced | `baseline::manage_apt` | Already the apt default. |
+| hl-apt-006 | 1.2.1.15 | `Acquire::Check-Date` | `true` | Enforced | `baseline::manage_apt` | Already the apt default. |
+
 
 ### 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7: /home and /var are not separate partitions
 
@@ -98,6 +124,20 @@ before it. That's opinionated: `/var/tmp` is meant to survive reboots, and
 here it doesn't, so nothing on these hosts should rely on files kept there.
 It makes the Level 1 option rules (1.1.2.5.2 to 1.1.2.5.4) apply without
 repartitioning. The size is the tmpfs default, half of RAM.
+
+### 1.2.1.1: Signed-By in the control repo
+
+The upstream, site-specific repo we use manages the apt sources for all managed
+packages, host packages, and vendor packages like Proxmox.  All utilize the
+`apt::source` resource type with a specific key or `signed-by` parameter that
+sets the `Signed-by` setting for each software source.
+
+### 1.2.1.5, 1.2.1.8: auth.conf.d and sources.list.d are monitored
+
+puppetlabs/apt (included by the control repo on every Debian 13 host)
+already declares both directories, root-owned but without a mode, so the
+baseline can't declare them without a duplicate resource. The package ships
+them root:root `0755`, and the Wazuh check catches any drift.
 
 ### 1.1.2.1.4: /tmp is not mounted noexec
 

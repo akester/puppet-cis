@@ -13,12 +13,16 @@
 # @param manage_mounts
 #   Manage the /tmp, /var/tmp and /dev/shm tmpfs mounts (baseline::mounts).
 #
+# @param manage_apt
+#   Manage ownership and mode of the apt key directories (baseline::apt).
+#
 # @example
 #   include baseline
 class baseline (
   Boolean $manage_sysctl = true,
   Boolean $manage_kmod   = true,
   Boolean $manage_mounts = true,
+  Boolean $manage_apt    = true,
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
@@ -30,5 +34,9 @@ class baseline (
 
   if $manage_mounts {
     contain baseline::mounts
+  }
+
+  if $manage_apt {
+    contain baseline::apt
   }
 }
