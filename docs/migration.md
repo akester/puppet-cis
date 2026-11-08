@@ -37,7 +37,7 @@ whenever a ported feature leaves something behind that os_hardening created.
       | Proxmox hosts with NFS storage | `rpcbind` |
       | NFS servers | `nfs`, `rpcbind` |
       | DHCP server | `dhcp` |
-      | Domain controller | `dns`, `samba` |
+      | Domain controller | `dns`, `samba`, `ldap-client` |
       | Network-boots the Pis | `tftp` |
       | Includes `nginx::base` | `nginx` |
       | Includes `ups::server` (nut-cgi) | `apache` |
@@ -45,7 +45,7 @@ whenever a ported feature leaves something behind that os_hardening created.
       Where a control-repo class declares the package too (autofs, DHCP,
       `puppet/nfs`, tftpd-hpa, nginx, apache2), a missing allow fails the
       catalog on a duplicate declaration. Where the package was installed
-      outside Puppet (bind9 and samba on the DC), nothing fails: it's just
+      outside Puppet (bind9, samba and ldap-utils on the DC), nothing fails: it's just
       purged. `harden::harden` passes these in `baseline`'s `services_allow`,
       worked out from the node's `classes`; anything else goes in
       `baseline::services::allow` in the node's Hiera.

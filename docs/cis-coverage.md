@@ -39,7 +39,7 @@ confirmed yet.
 | 1.6 | Command line warning banners | Enforced, with monitored rules | `/etc/motd`, `/etc/issue`, `/etc/issue.net` content and access, and the pam_motd content, enforced (1.6.1–1.6.4, 1.6.6–1.6.9), and update-notifier masked on Ubuntu (1.6.11, 1.6.12). sshd banner and its file (1.6.5, 1.6.10) monitored; set by the control repo's SSH config. |
 | 1.7 | GNOME Display Manager | N/A | No GDM installs in the fleet. |
 | 2.1 | Server services | Enforced | 2.1.1–2.1.20 enforced, with per-host exceptions through `baseline::services::allow`; rpcbind and the rsync daemon are masked rather than purged. 2.1.21 (X server) omitted (Level 2). 2.1.22 (MTA local-only) set by the control repo's postfix module. 2.1.23 (listening services) is Manual, monitored. |
-| 2.2 | Client services | Planned → Enforced | |
+| 2.2 | Client services | Enforced | All six clients purged; per-host exceptions through `baseline::services::allow` (`ldap-client` on the domain controller). |
 | 2.3 | Time synchronization | Planned | Must not conflict with the public NTP server's config. |
 | 2.4 | Job schedulers (cron, at) | Planned → Enforced | Parity with os_hardening. |
 | 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |

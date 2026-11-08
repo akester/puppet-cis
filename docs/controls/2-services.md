@@ -40,6 +40,21 @@ the profile that declares `baseline` passes it in `services_allow`.
 | — | 2.1.22 | MTA local-only | — | Replaced | — | Control repo: the `postfix` module sets `inet_interfaces = loopback-only`. |
 | — | 2.1.23 | Only approved services listening | — | Monitored | — | Manual rule: no automated check. Host firewalls (chapter 4) limit what's reachable. |
 
+### Client services (2.2)
+
+Also in `baseline::services`, with the same `allow` list. The keys for
+clients end in `-client` where a server has the same protocol name (`ldap` is
+slapd, `ldap-client` is ldap-utils).
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-client-001 | 2.2.1 | `nis` package | purged | Enforced | `baseline::services::allow` (`nis-client`) | |
+| hl-client-002 | 2.2.2 | `rsh-client` package | purged | Enforced | `baseline::services::allow` (`rsh-client`) | |
+| hl-client-003 | 2.2.3 | Talk client packages | purged | Enforced | `baseline::services::allow` (`talk`) | `talk`, which the benchmark checks, plus `inetutils-talk`. |
+| hl-client-004 | 2.2.4 | Telnet client packages | purged | Enforced | `baseline::services::allow` (`telnet-client`) | `telnet`, `inetutils-telnet` and `telnet-ssl`. Debian installs `inetutils-telnet` by default, so most hosts change on the first run. |
+| hl-client-005 | 2.2.5 | `ldap-utils` package | purged | Enforced | `baseline::services::allow` (`ldap-client`) | Allowed on the domain controller. |
+| hl-client-006 | 2.2.6 | FTP client packages | purged | Enforced | `baseline::services::allow` (`ftp-client`) | `ftp`, `tnftp`, `atftp`, `inetutils-ftp` and `ftp-ssl`, the list the benchmark checks. |
+
 ## Deviations
 
 ### hl-service-001: autofs for static network mounts

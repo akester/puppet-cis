@@ -111,6 +111,28 @@ describe 'baseline::services' do
         is_expected.to contain_package('xinetd').with_ensure('purged')
       end
 
+      {
+        'hl-client-001' => ['nis'],
+        'hl-client-002' => ['rsh-client'],
+        'hl-client-003' => ['talk', 'inetutils-talk'],
+        'hl-client-004' => ['telnet', 'inetutils-telnet', 'telnet-ssl'],
+        'hl-client-005' => ['ldap-utils'],
+        'hl-client-006' => ['ftp', 'tnftp', 'atftp', 'inetutils-ftp', 'ftp-ssl'],
+      }.each do |id, pkgs|
+        pkgs.each do |pkg|
+          it "#{id}: purges #{pkg}" do
+            is_expected.to contain_package(pkg).with_ensure('purged')
+          end
+        end
+      end
+
+      context 'with ldap-client allowed' do
+        let(:pre_condition) { "class { 'baseline': services_allow => ['ldap-client'] }" }
+
+        it { is_expected.not_to contain_package('ldap-utils') }
+        it { is_expected.to contain_package('slapd').with_ensure('purged') }
+      end
+
       context 'with rpcbind allowed' do
         let(:pre_condition) { "class { 'baseline': services_allow => ['rpcbind'] }" }
 
