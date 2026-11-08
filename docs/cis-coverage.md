@@ -36,8 +36,8 @@ confirmed yet.
 | 1.4.1 | Bootloader password | Omitted | Physical hosts are on site only; on VMs a Proxmox control-plane compromise gets past it anyway. |
 | 1.4.2 | Bootloader config access | Enforced | `grub.cfg` root:root `0600` where it exists. |
 | 1.5 | Additional process hardening | Enforced | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced; prelink and apport purged (1.5.6, 1.5.7); core dumps off via limits.d and systemd-coredump (1.5.10–1.5.12). |
-| 1.6 | Command line warning banners | Planned | |
-| 1.7 | GNOME Display Manager | N/A *(proposed)* | Headless servers. |
+| 1.6 | Command line warning banners | Enforced, with monitored rules | `/etc/motd`, `/etc/issue`, `/etc/issue.net` content and access, and the pam_motd content, enforced (1.6.1–1.6.4, 1.6.6–1.6.9), and update-notifier masked on Ubuntu (1.6.11, 1.6.12). sshd banner and its file (1.6.5, 1.6.10) monitored; set by the control repo's SSH config. |
+| 1.7 | GNOME Display Manager | N/A | No GDM installs in the fleet. |
 | 2.1 | Server services | Partial *(proposed)* | Some hosts intentionally run DHCP, NFS, Samba, web, and NTP services; per-role exceptions. |
 | 2.2 | Client services | Planned → Enforced | |
 | 2.3 | Time synchronization | Planned | Must not conflict with the public NTP server's config. |
@@ -84,7 +84,8 @@ are N/A. `/tmp`, `/dev/shm` and `/var/tmp` are tmpfs mounts managed by
 
 ### 1.7 GNOME Display Manager
 
-_TODO_
+Every host is a headless server; nothing in the fleet runs GDM or any other
+display manager, so none of the 1.7 rules apply.
 
 ### 2.1 Server services
 

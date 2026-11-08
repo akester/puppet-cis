@@ -15,6 +15,7 @@ describe 'baseline' do
       it { is_expected.to contain_class('baseline::apparmor') }
       it { is_expected.to contain_class('baseline::bootloader') }
       it { is_expected.to contain_class('baseline::process') }
+      it { is_expected.to contain_class('baseline::banners') }
 
       context 'with manage_sysctl => false' do
         let(:params) { { manage_sysctl: false } }
@@ -56,6 +57,12 @@ describe 'baseline' do
         let(:params) { { manage_process: false } }
 
         it { is_expected.not_to contain_class('baseline::process') }
+      end
+
+      context 'with manage_banners => false' do
+        let(:params) { { manage_banners: false } }
+
+        it { is_expected.not_to contain_class('baseline::banners') }
       end
     end
   end

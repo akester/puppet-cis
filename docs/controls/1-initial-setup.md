@@ -145,6 +145,35 @@ dumps with two drop-ins: `/etc/security/limits.d/60-baseline.conf` and
 | hl-process-005 | 1.5.12 | systemd-coredump `Storage` | `none` | Enforced | `baseline::manage_process` |  |
 | hl-sysctl-035 | — | `kernel.sysrq` | `0` | Enforced | `baseline::manage_sysctl` | Not CIS. Debian ships `438`. Carried over from os_hardening; see below. |
 
+### Warning banners (1.6)
+
+`baseline::banners` writes the warning text to `/etc/issue` (local console)
+and `/etc/issue.net` (remote logins), and empties `/etc/motd`. Moved from
+`harden::rules::banners` in the control repo.
+`baseline::manage_banners => false` turns it off.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-banner-001 | 1.6.1 | `/etc/motd` content | empty | Enforced | `baseline::manage_banners` | No system information. |
+| hl-banner-002 | 1.6.2 | `/etc/issue` content | warning text | Enforced | `baseline::banners::banner` | Getty escapes (`\m`, `\r`, `\s`, `\v`) are refused at compile time. |
+| hl-banner-003 | 1.6.3 | `/etc/issue.net` content | warning text | Enforced | `baseline::banners::banner` | Same text as `/etc/issue`. |
+| hl-banner-007 | 1.6.4 | pam_motd shows no system information | `/etc/update-motd.d/10-uname` absent | Enforced | `baseline::manage_banners` | Debian's sshd and login PAM show `/run/motd.dynamic`, rebuilt at each login; `10-uname` put `uname -snrvm` in it. |
+| — | 1.6.5 | sshd `Banner` | — | Monitored | — | Set by the site SSH config in the control repo; Wazuh SCA. |
+| hl-banner-004 | 1.6.6 | `/etc/motd` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
+| hl-banner-005 | 1.6.7 | `/etc/issue` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
+| hl-banner-006 | 1.6.8 | `/etc/issue.net` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
+| hl-banner-008 | 1.6.9 | `/run/motd.dynamic` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` | The `motd=` file in Debian's sshd and login PAM. Rewritten at each login; managed only where it exists. |
+| — | 1.6.10 | sshd banner file ownership and mode | — | Monitored | — | Site SSH config in the control repo; Wazuh SCA. |
+| hl-banner-009 | 1.6.11 | `update-notifier-motd.service` | stopped, masked | Enforced | `baseline::manage_banners` | Ubuntu only; Debian doesn't ship update-notifier. |
+| hl-banner-010 | 1.6.12 | `update-notifier-motd.timer` | stopped, masked | Enforced | `baseline::manage_banners` | Ubuntu only. |
+
+### GNOME Display Manager (1.7)
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 1.7.1–1.7.6 | GDM settings | — | N/A | — | No GDM (or any desktop) installed anywhere in the fleet. |
+| — | 1.7.7 | Xwayland | — | Omitted | — | Level 2, and N/A for the same reason. |
+
 ## Deviations
 
 ### 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7: /home and /var are not separate partitions

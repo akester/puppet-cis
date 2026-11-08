@@ -26,6 +26,9 @@
 # @param manage_process
 #   Remove prelink and apport, and turn off core dumps (baseline::process).
 #
+# @param manage_banners
+#   Manage /etc/issue, /etc/issue.net and /etc/motd (baseline::banners).
+#
 # @example
 #   include baseline
 class baseline (
@@ -36,6 +39,7 @@ class baseline (
   Boolean $manage_apparmor   = true,
   Boolean $manage_bootloader = true,
   Boolean $manage_process    = true,
+  Boolean $manage_banners    = true,
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
@@ -63,5 +67,9 @@ class baseline (
 
   if $manage_process {
     contain baseline::process
+  }
+
+  if $manage_banners {
+    contain baseline::banners
   }
 }

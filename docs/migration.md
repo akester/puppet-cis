@@ -22,6 +22,12 @@ whenever a ported feature leaves something behind that os_hardening created.
       same change, or the `/tmp`, `/var/tmp` and `/dev/shm` mounts are declared
       twice. `harden::harden`'s `tmpfs_size` parameter goes with it; set
       `baseline::mounts::tmp_size` in Hiera instead if a host needs another size.
+- [ ] **Banners:** drop `include harden::rules::banners` from `harden::harden`
+      in the same change, or `/etc/issue`, `/etc/issue.net` and `/etc/motd`
+      are declared twice. Hosts that still include `harden::rules::banners`
+      directly set `baseline::manage_banners: false` until they're moved.
+      The first run rewrites both issue files once: the old heredoc left six
+      stray spaces on the first line.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
       os_hardening's `system_environment => 'lxc'`).
 
