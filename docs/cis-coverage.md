@@ -38,7 +38,7 @@ confirmed yet.
 | 1.5 | Additional process hardening | Enforced | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced; prelink and apport purged (1.5.6, 1.5.7); core dumps off via limits.d and systemd-coredump (1.5.10–1.5.12). |
 | 1.6 | Command line warning banners | Enforced, with monitored rules | `/etc/motd`, `/etc/issue`, `/etc/issue.net` content and access, and the pam_motd content, enforced (1.6.1–1.6.4, 1.6.6–1.6.9), and update-notifier masked on Ubuntu (1.6.11, 1.6.12). sshd banner and its file (1.6.5, 1.6.10) monitored; set by the control repo's SSH config. |
 | 1.7 | GNOME Display Manager | N/A | No GDM installs in the fleet. |
-| 2.1 | Server services | Partial *(proposed)* | Some hosts intentionally run DHCP, NFS, Samba, web, and NTP services; per-role exceptions. |
+| 2.1 | Server services | Enforced | 2.1.1–2.1.20 enforced, with per-host exceptions through `baseline::services::allow`; rpcbind and the rsync daemon are masked rather than purged. 2.1.21 (X server) omitted (Level 2). 2.1.22 (MTA local-only) set by the control repo's postfix module. 2.1.23 (listening services) is Manual, monitored. |
 | 2.2 | Client services | Planned → Enforced | |
 | 2.3 | Time synchronization | Planned | Must not conflict with the public NTP server's config. |
 | 2.4 | Job schedulers (cron, at) | Planned → Enforced | Parity with os_hardening. |
@@ -68,6 +68,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | 1.1.1.11 | Unused filesystem modules | `squashfs` not loadable | `squashfs` loadable fleet-wide; `nfsd` allowed on NFS servers | [1-initial-setup.md](controls/1-initial-setup.md#deviations) |
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
 | 1.3.1.4, 1.5.3 | AppArmor and Yama sysctls | set | not set where the module isn't active | Raspberry Pi kernel; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-003-hl-sysctl-037-kernels-without-yama-or-apparmor) |
+| 2.1.1 | autofs | not installed | installed and running on hosts with network mounts | Static maps only; [2-services.md](controls/2-services.md#hl-service-001-autofs-for-static-network-mounts) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 
 ## Rationale
@@ -90,7 +91,10 @@ display manager, so none of the 1.7 rules apply.
 
 ### 2.1 Server services
 
-_TODO_
+The 2.1.1–2.1.20 "not in use" rules are enforced. A host that runs one of these services on
+purpose allows it by name, so the exception is per host and written down
+rather than a fleet-wide gap. See
+[2-services.md](controls/2-services.md#server-services-21).
 
 ### 3.3 Network kernel parameters
 

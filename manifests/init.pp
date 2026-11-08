@@ -29,17 +29,28 @@
 # @param manage_banners
 #   Manage /etc/issue, /etc/issue.net and /etc/motd (baseline::banners).
 #
+# @param manage_services
+#   Remove server and client packages CIS chapter 2 says not to run
+#   (baseline::services).
+#
+# @param services_allow
+#   Services baseline::services leaves alone on this host, added to
+#   `baseline::services::allow`. For a profile that declares `baseline` and
+#   works out the exceptions from the host's other classes.
+#
 # @example
 #   include baseline
 class baseline (
-  Boolean $manage_sysctl     = true,
-  Boolean $manage_kmod       = true,
-  Boolean $manage_mounts     = true,
-  Boolean $manage_apt        = true,
-  Boolean $manage_apparmor   = true,
-  Boolean $manage_bootloader = true,
-  Boolean $manage_process    = true,
-  Boolean $manage_banners    = true,
+  Boolean          $manage_sysctl     = true,
+  Boolean          $manage_kmod       = true,
+  Boolean          $manage_mounts     = true,
+  Boolean          $manage_apt        = true,
+  Boolean          $manage_apparmor   = true,
+  Boolean          $manage_bootloader = true,
+  Boolean          $manage_process    = true,
+  Boolean          $manage_banners    = true,
+  Boolean          $manage_services   = true,
+  Array[String[1]] $services_allow    = [],
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
@@ -71,5 +82,9 @@ class baseline (
 
   if $manage_banners {
     contain baseline::banners
+  }
+
+  if $manage_services {
+    contain baseline::services
   }
 }

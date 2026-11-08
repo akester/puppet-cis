@@ -28,6 +28,29 @@ whenever a ported feature leaves something behind that os_hardening created.
       directly set `baseline::manage_banners: false` until they're moved.
       The first run rewrites both issue files once: the old heredoc left six
       stray spaces on the first line.
+- [ ] **Services:** hosts that run a service the baseline removes need it
+      allowed *before* the switch, or it's purged or masked on the first run:
+
+      | Host | Allow |
+      |---|---|
+      | Includes `autofs::base` (NFSv3 client) | `autofs`, `rpcbind` |
+      | Proxmox hosts with NFS storage | `rpcbind` |
+      | NFS servers | `nfs`, `rpcbind` |
+      | DHCP server | `dhcp` |
+      | Domain controller | `dns`, `samba` |
+      | Network-boots the Pis | `tftp` |
+      | Includes `nginx::base` | `nginx` |
+      | Includes `ups::server` (nut-cgi) | `apache` |
+
+      Where a control-repo class declares the package too (autofs, DHCP,
+      `puppet/nfs`, tftpd-hpa, nginx, apache2), a missing allow fails the
+      catalog on a duplicate declaration. Where the package was installed
+      outside Puppet (bind9 and samba on the DC), nothing fails: it's just
+      purged. `harden::harden` passes these in `baseline`'s `services_allow`,
+      worked out from the node's `classes`; anything else goes in
+      `baseline::services::allow` in the node's Hiera.
+- [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
+      bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
       os_hardening's `system_environment => 'lxc'`).
 

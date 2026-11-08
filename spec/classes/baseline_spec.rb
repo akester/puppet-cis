@@ -64,6 +64,12 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::banners') }
       end
+
+      context 'with manage_services => false' do
+        let(:params) { { manage_services: false } }
+
+        it { is_expected.not_to contain_class('baseline::services') }
+      end
     end
   end
 end
