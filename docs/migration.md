@@ -49,6 +49,9 @@ whenever a ported feature leaves something behind that os_hardening created.
       purged. `harden::harden` passes these in `baseline`'s `services_allow`,
       worked out from the node's `classes`; anything else goes in
       `baseline::services::allow` in the node's Hiera.
+- [ ] **cron:** only root is in `/etc/cron.allow`. Move any job that runs as
+      another user (Puppet `cron` resources with a `user`) to a systemd timer
+      (`cronjobs::job`) first.
 - [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
       bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces

@@ -55,6 +55,47 @@ slapd, `ldap-client` is ldap-utils).
 | hl-client-005 | 2.2.5 | `ldap-utils` package | purged | Enforced | `baseline::services::allow` (`ldap-client`) | Allowed on the domain controller. |
 | hl-client-006 | 2.2.6 | FTP client packages | purged | Enforced | `baseline::services::allow` (`ftp-client`) | `ftp`, `tnftp`, `atftp`, `inetutils-ftp` and `ftp-ssl`, the list the benchmark checks. |
 
+### Time synchronization (2.3)
+
+Handled in the control repo: the `ntp` and `ntp::server` classes install
+chrony and keep it running on every host.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 2.3.1.1 | A single time sync daemon in use | chrony | Replaced | — | Control repo: `ntp`, `ntp::server`. Installing chrony removes `systemd-timesyncd` (the packages conflict). |
+| — | 2.3.2.1 | systemd-timesyncd authorized timeserver | — | N/A | — | chrony is the time daemon. |
+| — | 2.3.2.2 | systemd-timesyncd enabled and running | — | N/A | — | chrony is the time daemon. |
+| — | 2.3.3.1 | chrony configured with authorized servers | — | Replaced | — | Control repo: client and server templates in the `ntp` module. |
+| — | 2.3.3.2 | chrony runs as `_chrony` | — | Replaced | — | Debian package default; the control repo's templates keep it. |
+| — | 2.3.3.3 | chrony enabled and running | — | Replaced | — | Control repo: `Service['chrony.service']`. |
+
+### Job schedulers: cron (2.4.1)
+
+`baseline::cron` installs cron, keeps it running, and makes its config
+root-only (`baseline::manage_cron => false` turns it off).
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-cron-001 | 2.4.1.1 | `cron` service | enabled, running | Enforced | `baseline::manage_cron` | The package is ensured too, so the service resource always has something to manage. |
+| hl-cron-002 | 2.4.1.2 | `/etc/crontab` ownership and mode | root:root `0600` | Enforced | `baseline::manage_cron` | Debian ships it `0644`. |
+| hl-cron-003 | 2.4.1.3 | `/etc/cron.hourly` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | Debian ships the directories `0755`. |
+| hl-cron-004 | 2.4.1.4 | `/etc/cron.daily` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | |
+| hl-cron-005 | 2.4.1.5 | `/etc/cron.weekly` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | |
+| hl-cron-006 | 2.4.1.6 | `/etc/cron.monthly` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | |
+| hl-cron-007 | 2.4.1.7 | `/etc/cron.yearly` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | |
+| hl-cron-008 | 2.4.1.8 | `/etc/cron.d` ownership and mode | root:root `0700` | Enforced | `baseline::manage_cron` | |
+| hl-cron-009 | 2.4.1.9 | `/etc/cron.allow` | root:crontab `0640`, lists root | Enforced | `baseline::manage_cron` | Only root can run `crontab`; jobs for other users go in systemd timers. Group `crontab` so the setgid binary can read it. `/etc/cron.deny` gets the same access where it exists, though `cron.allow` overrides it. |
+
+### Job schedulers: at (2.4.2)
+
+`baseline::at` limits `at` to the users in `/etc/at.allow`
+(`baseline::manage_at => false` turns it off). The baseline doesn't install
+at; the file is written either way.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-at-001 | 2.4.2.1 | `/etc/at.allow` | root:daemon `0640`, lists root | Enforced | `baseline::at::allow_users` | Add a user in Hiera on a host where they use `at`. `/etc/at.deny` gets the same access where it exists, though `at.allow` overrides it. |
+
 ## Deviations
 
 ### hl-service-001: autofs for static network mounts

@@ -40,8 +40,8 @@ confirmed yet.
 | 1.7 | GNOME Display Manager | N/A | No GDM installs in the fleet. |
 | 2.1 | Server services | Enforced | 2.1.1–2.1.20 enforced, with per-host exceptions through `baseline::services::allow`; rpcbind and the rsync daemon are masked rather than purged. 2.1.21 (X server) omitted (Level 2). 2.1.22 (MTA local-only) set by the control repo's postfix module. 2.1.23 (listening services) is Manual, monitored. |
 | 2.2 | Client services | Enforced | All six clients purged; per-host exceptions through `baseline::services::allow` (`ldap-client` on the domain controller). |
-| 2.3 | Time synchronization | Planned | Must not conflict with the public NTP server's config. |
-| 2.4 | Job schedulers (cron, at) | Planned → Enforced | Parity with os_hardening. |
+| 2.3 | Time synchronization | Replaced | chrony on every host, configured in the control repo (`ntp`, `ntp::server`). The systemd-timesyncd rules (2.3.2) are N/A. |
+| 2.4 | Job schedulers (cron, at) | Enforced | 2.4.1 (cron) enforced by `baseline::cron`; only root can run `crontab`. 2.4.2 (at) enforced by `baseline::at`; root by default, other users per host in Hiera. |
 | 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
 | 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
 | 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6; 3.2.7 (manual review) undecided. |
@@ -95,6 +95,14 @@ The 2.1.1–2.1.20 "not in use" rules are enforced. A host that runs one of thes
 purpose allows it by name, so the exception is per host and written down
 rather than a fleet-wide gap. See
 [2-services.md](controls/2-services.md#server-services-21).
+
+### 2.3 Time synchronization
+
+chrony runs on every host and is configured in the control repo: `ntp` for
+clients, `ntp::server` for the public NTP server. The server and its upstreams
+are site-specific, so the config stays there. With chrony as the only daemon,
+the systemd-timesyncd rules don't apply. Per-rule detail is in
+[2-services.md](controls/2-services.md#time-synchronization-23).
 
 ### 3.3 Network kernel parameters
 

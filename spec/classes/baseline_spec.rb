@@ -70,6 +70,18 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::services') }
       end
+
+      context 'with manage_cron => false' do
+        let(:params) { { manage_cron: false } }
+
+        it { is_expected.not_to contain_class('baseline::cron') }
+      end
+
+      context 'with manage_at => false' do
+        let(:params) { { manage_at: false } }
+
+        it { is_expected.not_to contain_class('baseline::at') }
+      end
     end
   end
 end

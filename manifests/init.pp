@@ -33,6 +33,12 @@
 #   Remove server and client packages CIS chapter 2 says not to run
 #   (baseline::services).
 #
+# @param manage_cron
+#   Keep cron running and its config root-only (baseline::cron).
+#
+# @param manage_at
+#   Limit `at` to the users in /etc/at.allow (baseline::at).
+#
 # @param services_allow
 #   Services baseline::services leaves alone on this host, added to
 #   `baseline::services::allow`. For a profile that declares `baseline` and
@@ -50,6 +56,8 @@ class baseline (
   Boolean          $manage_process    = true,
   Boolean          $manage_banners    = true,
   Boolean          $manage_services   = true,
+  Boolean          $manage_cron       = true,
+  Boolean          $manage_at         = true,
   Array[String[1]] $services_allow    = [],
 ) {
   if $manage_sysctl {
@@ -86,5 +94,13 @@ class baseline (
 
   if $manage_services {
     contain baseline::services
+  }
+
+  if $manage_cron {
+    contain baseline::cron
+  }
+
+  if $manage_at {
+    contain baseline::at
   }
 }
