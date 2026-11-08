@@ -43,7 +43,70 @@ next boot. `baseline::kmod::allow` exempts listed modules on a host, and
 | hl-kmod-007 | 1.1.1.10 | `usb-storage` | Not loadable | Enforced | `baseline::kmod::allow` | Hosts that need USB disks allow it; see below. |
 | hl-kmod-014 | 1.1.1.11 | Unused filesystem modules | Not loadable | Enforced | `baseline::kmod::allow` | Fixed list from the Debian 13 kernel; mounted filesystems are never denied. See below. |
 
+### Filesystem partitions (1.1.2)
+
+`baseline::mounts` writes tmpfs entries to `/etc/fstab` for `/tmp`, `/var/tmp`
+and `/dev/shm`, and mounts them (or remounts them when the options change).
+`baseline::manage_mounts => false` turns the class off.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-mount-001 | 1.1.2.1.1 | `/tmp` is a tmpfs | `size=1G` | Enforced | `baseline::mounts::tmp_size` | The fstab entry takes precedence over systemd's `tmp.mount`, which is left alone (masked or not). |
+| hl-mount-002 | 1.1.2.1.2 | `/tmp` mount option | `nodev` | Enforced | `baseline::manage_mounts` |  |
+| hl-mount-003 | 1.1.2.1.3 | `/tmp` mount option | `nosuid` | Enforced | `baseline::manage_mounts` |  |
+| — | 1.1.2.1.4 | `/tmp` mount option | no `noexec` | Omitted | — | apt scripts run from `/tmp`; see below. |
+| hl-mount-004 | 1.1.2.2.1 | `/dev/shm` is a tmpfs | no size limit | Enforced | `baseline::manage_mounts` | systemd already mounts it; the fstab entry pins the options. Size is the tmpfs default (half of RAM). |
+| hl-mount-005 | 1.1.2.2.2 | `/dev/shm` mount option | `nodev` | Enforced | `baseline::manage_mounts` |  |
+| hl-mount-006 | 1.1.2.2.3 | `/dev/shm` mount option | `nosuid` | Enforced | `baseline::manage_mounts` |  |
+| hl-mount-007 | 1.1.2.2.4 | `/dev/shm` mount option | `noexec` | Enforced | `baseline::manage_mounts` | Not the systemd default; added by the fstab entry. |
+| — | 1.1.2.3.1 | Separate `/home` partition | — | Omitted | — | Level 2. `/home` is on `/`. |
+| — | 1.1.2.3.2 | `/home` mount option | `nodev` | N/A | — | Only applies to a separate `/home`; see below. |
+| — | 1.1.2.3.3 | `/home` mount option | `nosuid` | N/A | — | Only applies to a separate `/home`; see below. |
+| — | 1.1.2.4.1 | Separate `/var` partition | — | Omitted | — | Level 2. `/var` is on `/`. |
+| — | 1.1.2.4.2 | `/var` mount option | `nodev` | N/A | — | Only applies to a separate `/var`; see below. |
+| — | 1.1.2.4.3 | `/var` mount option | `nosuid` | N/A | — | Only applies to a separate `/var`; see below. |
+| hl-mount-008 | 1.1.2.5.1 | `/var/tmp` is a separate mount | tmpfs, no size limit | Enforced | `baseline::manage_mounts` | **Level 2**; kept as an addition. Contents don't survive a reboot; see below. |
+| hl-mount-009 | 1.1.2.5.2 | `/var/tmp` mount option | `nodev` | Enforced | `baseline::manage_mounts` |  |
+| hl-mount-010 | 1.1.2.5.3 | `/var/tmp` mount option | `nosuid` | Enforced | `baseline::manage_mounts` |  |
+| hl-mount-011 | 1.1.2.5.4 | `/var/tmp` mount option | `noexec` | Enforced | `baseline::manage_mounts` |  |
+| — | 1.1.2.6.1 | Separate `/var/log` partition | — | Omitted | — | Level 2. `/var/log` is on `/`. |
+| — | 1.1.2.6.2 | `/var/log` mount option | `nodev` | N/A | — | Only applies to a separate `/var/log`; see below. |
+| — | 1.1.2.6.3 | `/var/log` mount option | `nosuid` | N/A | — | Only applies to a separate `/var/log`; see below. |
+| — | 1.1.2.6.4 | `/var/log` mount option | `noexec` | N/A | — | Only applies to a separate `/var/log`; see below. |
+| — | 1.1.2.7.1 | Separate `/var/log/audit` partition | — | Omitted | — | Level 2. `/var/log/audit` is on `/`. |
+| — | 1.1.2.7.2 | `/var/log/audit` mount option | `nodev` | N/A | — | Only applies to a separate `/var/log/audit`; see below. |
+| — | 1.1.2.7.3 | `/var/log/audit` mount option | `nosuid` | N/A | — | Only applies to a separate `/var/log/audit`; see below. |
+| — | 1.1.2.7.4 | `/var/log/audit` mount option | `noexec` | N/A | — | Only applies to a separate `/var/log/audit`; see below. |
+
 ## Deviations
+
+### 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7: /home and /var are not separate partitions
+
+Separate partitions for `/home`, `/var`, `/var/log` and `/var/log/audit`
+(1.1.2.x.1) are Level 2, and fleet hosts keep all of them on the root
+filesystem. Their mount-option rules (`nodev`, `nosuid`, and `noexec` for the
+log paths) are Level 1 but only apply to a separate partition; setting them on
+`/` would break the system. They are N/A here, and the baseline does not check
+for or manage these mounts. `/var/tmp` (1.1.2.5) is different: it is a tmpfs
+managed by `baseline::mounts`.
+
+### hl-mount-008: /var/tmp as a tmpfs
+
+CIS's separate `/var/tmp` partition (1.1.2.5.1) is Level 2 and assumes a disk
+partition. The baseline mounts a tmpfs instead, as `harden::rules::devs` did
+before it. That's opinionated: `/var/tmp` is meant to survive reboots, and
+here it doesn't, so nothing on these hosts should rely on files kept there.
+It makes the Level 1 option rules (1.1.2.5.2 to 1.1.2.5.4) apply without
+repartitioning. The size is the tmpfs default, half of RAM.
+
+### 1.1.2.1.4: /tmp is not mounted noexec
+
+CIS Level 1 wants `noexec` on `/tmp`. Many apt maintainer scripts and
+third-party installers write executables to `/tmp` and run them, and fail
+under `noexec`. Re-pointing them all (`APT::ExtractTemplates::TempDir`,
+`TMPDIR` for every installer) isn't worth the breakage, so `/tmp` stays
+executable. `nodev` and `nosuid` still apply. The Wazuh check will need an
+exception.
 
 ### hl-sysctl-003: ptrace_scope 2
 

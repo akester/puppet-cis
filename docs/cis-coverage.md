@@ -29,7 +29,7 @@ confirmed yet.
 | CIS | Section | Status | Notes |
 |---|---|---|---|
 | 1.1.1 | Filesystem kernel modules | Enforced, with exceptions | Level 1 rules enforced, including the 1.1.1.11 catch-all; per-host `allow`. `overlay` (Level 2) stays loadable for containers. |
-| 1.1.2 | Filesystem partitions | Partial *(proposed)* | Partitioning is done at install time; Puppet manages mount options only. |
+| 1.1.2 | Filesystem partitions | Partial | 1.1.2.1 (`/tmp`) enforced except `noexec`; 1.1.2.2 (`/dev/shm`) and 1.1.2.5 (`/var/tmp`, a tmpfs) enforced. 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7 (`/home`, `/var`, `/var/log`, `/var/log/audit`) N/A: on `/`, not separate partitions. |
 | 1.2.1 | Package repositories | Undecided | Hosts use the apt.kester.cloud mirror. |
 | 1.2.2 | Package updates | Undecided | Updates currently go through apt-dater. |
 | 1.3.1 | AppArmor | Partial | 1.3.1.4 sysctl enforced. The rest *(proposed)* monitored: enabled by default on trixie; SCA confirms it stays that way. |
@@ -64,6 +64,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 
 | CIS | Recommendation | CIS expects | Baseline does | Rationale |
 |---|---|---|---|---|
+| 1.1.2.1.4 | `/tmp` noexec | `noexec` on `/tmp` | `/tmp` stays executable | apt scripts; [1-initial-setup.md](controls/1-initial-setup.md#11214-tmp-is-not-mounted-noexec) |
 | 1.1.1.11 | Unused filesystem modules | `squashfs` not loadable | `squashfs` loadable fleet-wide; `nfsd` allowed on NFS servers | [1-initial-setup.md](controls/1-initial-setup.md#deviations) |
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
@@ -75,7 +76,11 @@ each departure has its reasoning written down.
 
 ### 1.1.2 Filesystem partitions
 
-_TODO_
+Hosts are installed with a single root filesystem. Separate partitions are
+Level 2 and not adopted, so the mount-option rules for paths that live on `/`
+are N/A. `/tmp`, `/dev/shm` and `/var/tmp` are tmpfs mounts managed by
+`baseline::mounts`. Per-path detail is in
+[1-initial-setup.md](controls/1-initial-setup.md#deviations).
 
 ### 1.7 GNOME Display Manager
 

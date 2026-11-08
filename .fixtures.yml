@@ -10,3 +10,7 @@ fixtures:
     augeasproviders_sysctl:
       repo: puppet/augeasproviders_sysctl
       ref: 4.1.0
+    # Vendored in the OpenVox agent packages, but not in the openvox gem.
+    mount_core:
+      repo: puppetlabs/mount_core
+      ref: 2.1.0

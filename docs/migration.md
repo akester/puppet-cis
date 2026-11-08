@@ -18,6 +18,10 @@ whenever a ported feature leaves something behind that os_hardening created.
       disks, `cifs` for SMB mounts, `xfs`/`btrfs` for any such volume. Check
       the Puppet log for "not denying mounted filesystem modules" after the
       first run.
+- [ ] **Mounts:** `harden::rules::devs` has to go from `harden::harden` in the
+      same change, or the `/tmp`, `/var/tmp` and `/dev/shm` mounts are declared
+      twice. `harden::harden`'s `tmpfs_size` parameter goes with it; set
+      `baseline::mounts::tmp_size` in Hiera instead if a host needs another size.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
       os_hardening's `system_environment => 'lxc'`).
 
@@ -32,6 +36,7 @@ whenever a ported feature leaves something behind that os_hardening created.
 | `enable_ipv6` | — | Dropped. IPv6 status is CIS 3.1.1, not ported yet. |
 | `enable_rpfilter`, `rpfilter_loose` | `baseline::sysctl::rp_filter` (1 or 2) | Not set anywhere today. |
 | `system_environment: lxc` | `baseline::manage_sysctl: false` | |
+| `harden::harden::tmpfs_size` | `baseline::mounts::tmp_size` | Not from os_hardening. Never overridden today. |
 | `disable_filesystems` | — | Dropped; the list is fixed to CIS Level 1. Use `baseline::kmod::allow` to exempt. |
 
 ## After the first baseline run
