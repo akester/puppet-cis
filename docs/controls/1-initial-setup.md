@@ -5,28 +5,6 @@ section-level status is in [cis-coverage.md](../cis-coverage.md).
 
 ## Controls
 
-| ID | CIS | Setting | Value | Status | Parameter | Notes |
-|---|---|---|---|---|---|---|
-| hl-apparmor-001 | 1.3.1.1 | `apparmor` package | installed | Enforced | `baseline::manage_apparmor` | Part of the default Debian 13 install. |
-| hl-apparmor-002 | 1.3.1.1 | `apparmor-utils` package | installed | Enforced | `baseline::manage_apparmor` | Not installed by default; the baseline adds it. |
-| — | 1.3.1.2 | AppArmor enabled at boot | — | Monitored | — | On by default in the Debian kernel; Wazuh SCA. |
-| — | 1.3.1.3 | All AppArmor profiles enforcing | — | Omitted | — | Level 2. |
-| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. |
-| — | 1.4.1 | Bootloader password | — | Omitted | — | See below. |
-| hl-boot-001 | 1.4.2 | `/boot/grub/grub.cfg` ownership and mode | root:root `0600` | Enforced | `baseline::manage_bootloader` | Only where the file exists. update-grub resets the mode; the next run fixes it. |
-| hl-sysctl-001 | 1.5.1 | `fs.protected_hardlinks` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian default; managed so it can't drift. |
-| hl-sysctl-002 | 1.5.2 | `fs.protected_symlinks` | `1` | Enforced | `baseline::manage_sysctl` | **Level 2** in CIS; kept as an addition because it's the Debian default anyway. |
-| hl-sysctl-003 | 1.5.3 | `kernel.yama.ptrace_scope` | `2` | Enforced | `baseline::sysctl::ptrace_scope` (1–2) | Debian ships `0`. CIS accepts 1, 2 or 3; see below. |
-| hl-sysctl-004 | 1.5.4 | `fs.suid_dumpable` | `0` | Enforced | `baseline::manage_sysctl` | Kernel default is `0`, but systemd-coredump's `50-coredump.conf` sets `2`; the baseline drop-in (`60-`) loads later and wins. Carried over from os_hardening. |
-| hl-sysctl-005 | 1.5.5 | `kernel.dmesg_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian kernel default; managed so it can't drift. |
-| hl-sysctl-006 | 1.5.8 | `kernel.kptr_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Hides `/proc/kallsyms` and similar addresses from users without `CAP_SYSLOG`. |
-| hl-sysctl-007 | 1.5.9 | `kernel.randomize_va_space` | `2` | Enforced | `baseline::manage_sysctl` | Already the kernel default. Carried over from os_hardening. |
-| hl-sysctl-035 | — | `kernel.sysrq` | `0` | Enforced | `baseline::manage_sysctl` | Not CIS. Debian ships `438`. Carried over from os_hardening; see below. |
-
-Sysctl controls are written to `/etc/sysctl.d/60-baseline.conf` and applied
-to the running kernel (`baseline::sysctl`). `manage_sysctl => false` turns
-the whole set off, e.g. in LXC containers.
-
 ### Kernel modules (1.1.1)
 
 Kernel module controls are written to `/etc/modprobe.d/60-baseline.conf` by
@@ -111,6 +89,63 @@ earlier drop-ins. `baseline::manage_apt => false` turns it off.
 | hl-apt-005 | 1.2.1.14 | `Acquire::AllowDowngradeToInsecureRepositories` | `0` | Enforced | `baseline::manage_apt` | Already the apt default. |
 | hl-apt-006 | 1.2.1.15 | `Acquire::Check-Date` | `true` | Enforced | `baseline::manage_apt` | Already the apt default. |
 
+### Package updates (1.2.2)
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 1.2.2.1 | Updates and patches installed | — | Replaced | — | Control repo: `base::unattended` runs unattended-upgrades daily. Its allow list has to include the site's own repositories, so it stays there. |
+
+### AppArmor (1.3.1)
+
+`baseline::apparmor` installs the userspace packages
+(`baseline::manage_apparmor => false` turns it off). The 1.3.1.4 sysctl is
+written by `baseline::sysctl`, like the 1.5 ones.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-apparmor-001 | 1.3.1.1 | `apparmor` package | installed | Enforced | `baseline::manage_apparmor` | Part of the default Debian 13 install. |
+| hl-apparmor-002 | 1.3.1.1 | `apparmor-utils` package | installed | Enforced | `baseline::manage_apparmor` | Not installed by default; the baseline adds it. |
+| — | 1.3.1.2 | AppArmor enabled at boot | — | Monitored | — | On by default in the Debian kernel; Wazuh SCA. |
+| — | 1.3.1.3 | All AppArmor profiles enforcing | — | Omitted | — | Level 2. |
+| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. |
+
+### Bootloader (1.4)
+
+`baseline::bootloader` manages the GRUB config's ownership and mode
+(`baseline::manage_bootloader => false` turns it off).
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 1.4.1 | Bootloader password | — | Omitted | — | See below. |
+| hl-boot-001 | 1.4.2 | `/boot/grub/grub.cfg` ownership and mode | root:root `0600` | Enforced | `baseline::manage_bootloader` | Only where the file exists. update-grub resets the mode; the next run fixes it. |
+
+### Additional process hardening (1.5)
+
+Sysctl controls are written to `/etc/sysctl.d/60-baseline.conf` and applied
+to the running kernel (`baseline::sysctl`). `manage_sysctl => false` turns
+the whole set off, e.g. in LXC containers.
+`baseline::process` removes the packages 1.5 rules out and turns off core
+dumps with two drop-ins: `/etc/security/limits.d/60-baseline.conf` and
+`/etc/systemd/coredump.conf.d/60-baseline.conf`
+(`baseline::manage_process => false` turns it off).
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-sysctl-001 | 1.5.1 | `fs.protected_hardlinks` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian default; managed so it can't drift. |
+| hl-sysctl-002 | 1.5.2 | `fs.protected_symlinks` | `1` | Enforced | `baseline::manage_sysctl` | **Level 2** in CIS; kept as an addition because it's the Debian default anyway. |
+| hl-sysctl-003 | 1.5.3 | `kernel.yama.ptrace_scope` | `2` | Enforced | `baseline::sysctl::ptrace_scope` (1–2) | Debian ships `0`. CIS accepts 1, 2 or 3; see below. |
+| hl-sysctl-004 | 1.5.4 | `fs.suid_dumpable` | `0` | Enforced | `baseline::manage_sysctl` | Kernel default is `0`, but systemd-coredump's `50-coredump.conf` sets `2`; the baseline drop-in (`60-`) loads later and wins. Carried over from os_hardening. |
+| hl-sysctl-005 | 1.5.5 | `kernel.dmesg_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Already the Debian kernel default; managed so it can't drift. |
+| hl-process-001 | 1.5.6 | `prelink` package | purged | Enforced | `baseline::manage_process` | No trixie package (apt doesn't know it); keeps it from coming back. |
+| hl-process-002 | 1.5.7 | `apport` package | purged | Enforced | `baseline::manage_process` | No install candidate on trixie. CIS also accepts `enabled=0`; purging covers both checks. |
+| hl-sysctl-006 | 1.5.8 | `kernel.kptr_restrict` | `1` | Enforced | `baseline::manage_sysctl` | Hides `/proc/kallsyms` and similar addresses from users without `CAP_SYSLOG`. |
+| hl-sysctl-007 | 1.5.9 | `kernel.randomize_va_space` | `2` | Enforced | `baseline::manage_sysctl` | Already the kernel default. Carried over from os_hardening. |
+| hl-process-003 | 1.5.10 | Core file size limit | `* hard core 0` | Enforced | `baseline::manage_process` | pam_limits; applies to login sessions, not systemd services or root. See below. |
+| hl-process-004 | 1.5.11 | systemd-coredump `ProcessSizeMax` | `0` | Enforced | `baseline::manage_process` | Written even where systemd-coredump isn't installed. |
+| hl-process-005 | 1.5.12 | systemd-coredump `Storage` | `none` | Enforced | `baseline::manage_process` |  |
+| hl-sysctl-035 | — | `kernel.sysrq` | `0` | Enforced | `baseline::manage_sysctl` | Not CIS. Debian ships `438`. Carried over from os_hardening; see below. |
+
+## Deviations
 
 ### 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7: /home and /var are not separate partitions
 
@@ -169,6 +204,16 @@ under `noexec`. Re-pointing them all (`APT::ExtractTemplates::TempDir`,
 `TMPDIR` for every installer) isn't worth the breakage, so `/tmp` stays
 executable. `nodev` and `nosuid` still apply. The Wazuh check will need an
 exception.
+
+### hl-process-003..005: core dumps
+
+The `* hard core 0` limit comes from pam_limits, so it only covers PAM
+sessions (SSH, console, `su`, `sudo`), and pam_limits never applies a `*`
+entry to root. Services started by systemd don't go through PAM. For
+everything else, the kernel hands crashes to systemd-coredump where it's
+installed, and `ProcessSizeMax=0` with `Storage=none` makes it log the crash
+without keeping a dump. `fs.suid_dumpable=0` (hl-sysctl-004) also stops
+setuid programs from dumping.
 
 ### hl-sysctl-003: ptrace_scope 2
 

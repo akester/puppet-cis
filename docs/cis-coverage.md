@@ -35,7 +35,7 @@ confirmed yet.
 | 1.3.1 | AppArmor | Enforced, with monitored rules | Packages (1.3.1.1) and the 1.3.1.4 sysctl enforced. 1.3.1.2 monitored: enabled by default on Debian 13. 1.3.1.3 omitted (Level 2). |
 | 1.4.1 | Bootloader password | Omitted | Physical hosts are on site only; on VMs a Proxmox control-plane compromise gets past it anyway. |
 | 1.4.2 | Bootloader config access | Enforced | `grub.cfg` root:root `0600` where it exists. |
-| 1.5 | Additional process hardening | Partial | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced. Planned: prelink, error reporting, core dump limits, systemd-coredump. |
+| 1.5 | Additional process hardening | Enforced | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced; prelink and apport purged (1.5.6, 1.5.7); core dumps off via limits.d and systemd-coredump (1.5.10–1.5.12). |
 | 1.6 | Command line warning banners | Planned | |
 | 1.7 | GNOME Display Manager | N/A *(proposed)* | Headless servers. |
 | 2.1 | Server services | Partial *(proposed)* | Some hosts intentionally run DHCP, NFS, Samba, web, and NTP services; per-role exceptions. |
