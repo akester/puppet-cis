@@ -65,7 +65,7 @@ All Level 1 Server. Same mechanism as the 1.1.1 modules; see
 | hl-kmod-011 | 3.2.4 | `rds` | Not loadable | Enforced | `baseline::manage_kmod` |  |
 | hl-kmod-012 | 3.2.5 | `sctp` | Not loadable | Enforced | `baseline::manage_kmod` |  |
 | hl-kmod-013 | 3.2.6 | `tipc` | Not loadable | Enforced | `baseline::manage_kmod` |  |
-| — | 3.2.7 | Unneeded network protocol modules | — | Undecided | — | Manual review in CIS; no fixed list. |
+| — | 3.2.7 | Unneeded network protocol modules | — | Monitored | `baseline::kmod` | Manual rule. Loaded protocol modules were reviewed and nothing beyond 3.2.1–3.2.6 needs denying. To check a host, see below; a protocol that should go is added to `baseline::kmod`. |
 
 ## Deviations
 
@@ -116,6 +116,22 @@ Keeps TIME_WAIT sockets alive when a reset arrives, instead of closing them
 early (TIME-WAIT assassination, RFC 1337). The security gain is small and the
 cost is negligible. It's kept because the fleet already runs it under
 os_hardening, so dropping it would be a behavior change for no benefit.
+
+### 3.2.7: reviewing loaded protocol modules
+
+This lists the loaded modules under the kernel's `net/` tree, grouped by
+subsystem:
+
+```bash
+for m in $(lsmod | awk 'NR>1{print $1}'); do
+  p=$(modinfo -n "$m" 2>/dev/null)
+  case "$p" in */kernel/net/*) d=${p#*/kernel/net/}; echo "${d%%/*} $m";; esac
+done | sort | awk '{a[$1]=a[$1]" "$2} END{for(k in a) print k":"a[k]}' | sort
+```
+
+It only shows what's loaded now, and protocol drivers under `drivers/net/`
+aren't included. A denied module (sctp, say) that was loaded before the deny
+file arrived stays loaded until the next boot.
 
 ### hl-kmod-015: wireless through cfg80211
 

@@ -45,7 +45,7 @@ confirmed yet.
 | 3.1.1 | IPv6 status | N/A | Manual rule. IPv6 stays enabled in the kernel; only some hosts use it. |
 | 3.1.2 | Wireless | Enforced | `cfg80211` denied by `baseline::kmod`, which stops every Wi-Fi driver. |
 | 3.1.3 | Bluetooth | Enforced | `bluez` purged by `baseline::services`; the `bluetooth` kernel module is denied too. |
-| 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6; 3.2.7 (manual review) undecided. |
+| 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6 denied by `baseline::kmod`. 3.2.7 (manual) reviewed; nothing else to deny. |
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
 | 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
