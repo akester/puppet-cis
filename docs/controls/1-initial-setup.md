@@ -107,7 +107,7 @@ written by `baseline::sysctl`, like the 1.5 ones.
 | hl-apparmor-002 | 1.3.1.1 | `apparmor-utils` package | installed | Enforced | `baseline::manage_apparmor` | Not installed by default; the baseline adds it. |
 | — | 1.3.1.2 | AppArmor enabled at boot | — | Monitored | — | On by default in the Debian kernel; Wazuh SCA. |
 | — | 1.3.1.3 | All AppArmor profiles enforcing | — | Omitted | — | Level 2. |
-| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::manage_sysctl` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. Skipped where AppArmor isn't active (Raspberry Pi kernel). |
+| hl-sysctl-037 | 1.3.1.4 | `kernel.apparmor_restrict_unprivileged_unconfined` | `1` | Enforced | `baseline::sysctl::apparmor_restrict_unconfined` | Stops unprivileged, unconfined processes from using `aa-exec` to switch to a more permissive profile. The key exists on the Debian 13 kernel. `0` on K3s nodes; see below. Skipped where AppArmor isn't active (Raspberry Pi kernel). |
 
 ### Bootloader (1.4)
 
@@ -263,6 +263,15 @@ and setting them fails. The `baseline_lsm` fact reads the active modules from
 module isn't listed. Those hosts don't meet 1.5.3 or 1.3.1.4, and there's no
 setting that would fix that short of a kernel with the module enabled. If the
 fact is missing, both keys are managed as usual.
+
+### hl-sysctl-037: unconfined AppArmor restriction off on K3s nodes
+
+With `kernel.apparmor_restrict_unprivileged_unconfined = 1`, container
+processes on K3s nodes broke. K3s nodes set
+`baseline::sysctl::apparmor_restrict_unconfined: false` in Hiera, which
+writes `0` and deviates from 1.3.1.4. AppArmor itself stays installed and
+enabled (1.3.1.1, 1.3.1.2), and every other host keeps `1`. The Wazuh check
+will need an exception for these nodes.
 
 ### hl-sysctl-035: kernel.sysrq 0 (not CIS)
 

@@ -67,6 +67,14 @@ describe 'baseline::sysctl' do
         end
       end
 
+      context 'with apparmor_restrict_unconfined: false in Hiera' do
+        let(:facts) { os_facts.merge(hiera_case: 'k3s_apparmor') }
+
+        it 'hl-sysctl-037: lets unconfined processes switch AppArmor profiles' do
+          is_expected.to contain_sysctl('kernel.apparmor_restrict_unprivileged_unconfined').with_value('0')
+        end
+      end
+
       context 'with ipv4_forwarding: true in Hiera' do
         let(:facts) { os_facts.merge(hiera_case: 'forwarding') }
 

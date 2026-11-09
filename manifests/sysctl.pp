@@ -11,6 +11,11 @@
 #   CAP_SYS_PTRACE; 1 also lets a process trace its own descendants. 3 is
 #   not offered: it can't be undone without a reboot.
 #
+# @param apparmor_restrict_unconfined
+#   Stop unprivileged, unconfined processes switching AppArmor profiles
+#   (hl-sysctl-037). Set false on K3s nodes, where it breaks container
+#   processes.
+#
 # @param ipv4_forwarding
 #   Allow IPv4 forwarding (hl-sysctl-008..010). Needed on container hosts,
 #   K3s nodes and routers; Docker turns it back on at runtime regardless.
@@ -34,15 +39,17 @@
 # @api private
 class baseline::sysctl (
   Stdlib::Absolutepath $target          = '/etc/sysctl.d/60-baseline.conf',
-  Integer[1, 2]        $ptrace_scope    = 2,
-  Boolean              $ipv4_forwarding = false,
-  Integer[1, 2]        $rp_filter       = 1,
-  Optional[Boolean]    $log_martians    = undef,
-  Boolean              $manage_ipv6     = true,
-  Boolean              $ipv6_forwarding = false,
+  Integer[1, 2]        $ptrace_scope                 = 2,
+  Boolean              $apparmor_restrict_unconfined = true,
+  Boolean              $ipv4_forwarding              = false,
+  Integer[1, 2]        $rp_filter                    = 1,
+  Optional[Boolean]    $log_martians                 = undef,
+  Boolean              $manage_ipv6                  = true,
+  Boolean              $ipv6_forwarding              = false,
 ) {
   assert_private()
 
+  $aa_restrict = bool2str($apparmor_restrict_unconfined, '1', '0')
   $forward4 = bool2str($ipv4_forwarding, '1', '0')
   $forward6 = bool2str($ipv6_forwarding, '1', '0')
   $martians = bool2str(pick($log_martians, !$ipv4_forwarding), '1', '0')
@@ -56,7 +63,7 @@ class baseline::sysctl (
     'kernel.kptr_restrict'                             => '1', # hl-sysctl-006, CIS 1.5.8
     'kernel.randomize_va_space'                        => '2', # hl-sysctl-007, CIS 1.5.9
     'kernel.sysrq'                                     => '0', # hl-sysctl-035, not CIS
-    'kernel.apparmor_restrict_unprivileged_unconfined' => '1', # hl-sysctl-037, CIS 1.3.1.4
+    'kernel.apparmor_restrict_unprivileged_unconfined' => $aa_restrict, # hl-sysctl-037, CIS 1.3.1.4
   }
 
   # Yama and AppArmor only register their sysctls while the security module is

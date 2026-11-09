@@ -1,0 +1,2 @@
+---
+baseline::sysctl::apparmor_restrict_unconfined: false

@@ -32,7 +32,7 @@ confirmed yet.
 | 1.1.2 | Filesystem partitions | Partial | 1.1.2.1 (`/tmp`) enforced except `noexec`; 1.1.2.2 (`/dev/shm`) and 1.1.2.5 (`/var/tmp`, a tmpfs) enforced. 1.1.2.3, 1.1.2.4, 1.1.2.6, 1.1.2.7 (`/home`, `/var`, `/var/log`, `/var/log/audit`) N/A: on `/`, not separate partitions. |
 | 1.2.1 | Package repositories | Enforced, with monitored rules | Sources are managed in the control repo (apt.kester.cloud mirror), all with Signed-By (1.2.1.1). 1.2.1.2 omitted (Level 2). Key directory permissions enforced (1.2.1.4, 1.2.1.7); the directories puppetlabs/apt owns (1.2.1.5, 1.2.1.8), file permissions and https monitored (1.2.1.3, 1.2.1.6, 1.2.1.9–1.2.1.11). Repository security settings enforced (1.2.1.12–1.2.1.15). |
 | 1.2.2 | Package updates | Replaced | unattended-upgrades, configured in the control repo (`base::unattended`) because its allow list covers site repositories. |
-| 1.3.1 | AppArmor | Enforced, with monitored rules | Packages (1.3.1.1) and the 1.3.1.4 sysctl enforced. 1.3.1.2 monitored: enabled by default on Debian 13. 1.3.1.3 omitted (Level 2). |
+| 1.3.1 | AppArmor | Enforced, with monitored rules | Packages (1.3.1.1) and the 1.3.1.4 sysctl enforced; the sysctl is off on K3s nodes. 1.3.1.2 monitored: enabled by default on Debian 13. 1.3.1.3 omitted (Level 2). |
 | 1.4.1 | Bootloader password | Omitted | Physical hosts are on site only; on VMs a Proxmox control-plane compromise gets past it anyway. |
 | 1.4.2 | Bootloader config access | Enforced | `grub.cfg` root:root `0600` where it exists. |
 | 1.5 | Additional process hardening | Enforced | sysctls (1.5.1–1.5.5, 1.5.8, 1.5.9) enforced; prelink and apport purged (1.5.6, 1.5.7); core dumps off via limits.d and systemd-coredump (1.5.10–1.5.12). |
@@ -68,6 +68,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | 1.1.2.1.4 | `/tmp` noexec | `noexec` on `/tmp` | `/tmp` stays executable | apt scripts; [1-initial-setup.md](controls/1-initial-setup.md#11214-tmp-is-not-mounted-noexec) |
 | 1.1.1.11 | Unused filesystem modules | `squashfs` not loadable | `squashfs` loadable fleet-wide; `nfsd` allowed on NFS servers | [1-initial-setup.md](controls/1-initial-setup.md#deviations) |
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
+| 1.3.1.4 | Unconfined AppArmor restriction | `1` | `0` on K3s nodes | Breaks container processes; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-037-unconfined-apparmor-restriction-off-on-k3s-nodes) |
 | 1.3.1.4, 1.5.3 | AppArmor and Yama sysctls | set | not set where the module isn't active | Raspberry Pi kernel; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-003-hl-sysctl-037-kernels-without-yama-or-apparmor) |
 | 2.1.1 | autofs | not installed | installed and running on hosts with network mounts | Static maps only; [2-services.md](controls/2-services.md#hl-service-001-autofs-for-static-network-mounts) |
 | 5.1.22 | PermitRootLogin | `no` | `yes` on Proxmox hosts | Cluster SSH as root; [5-access-control.md](controls/5-access-control.md#hl-ssh-022-root-logins-on-proxmox-hosts) |
