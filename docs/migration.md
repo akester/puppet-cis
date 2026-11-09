@@ -37,7 +37,7 @@ whenever a ported feature leaves something behind that os_hardening created.
       | Proxmox hosts with NFS storage | `rpcbind` |
       | NFS servers | `nfs`, `rpcbind` |
       | DHCP server | `dhcp` |
-      | Domain controller | `dns`, `samba`, `ldap-client` |
+      | Domain controller | `dns`, `samba`, `ldap-client`, `nginx` (Zentyal web admin) |
       | Network-boots the Pis | `tftp` |
       | Includes `nginx::base` | `nginx` |
       | Includes `ups::server` (nut-cgi) | `apache` |

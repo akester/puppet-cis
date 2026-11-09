@@ -126,6 +126,10 @@ describe 'baseline::services' do
         end
       end
 
+      it 'hl-service-022: purges bluez' do
+        is_expected.to contain_package('bluez').with_ensure('purged')
+      end
+
       context 'with ldap-client allowed' do
         let(:pre_condition) { "class { 'baseline': services_allow => ['ldap-client'] }" }
 

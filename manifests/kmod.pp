@@ -38,6 +38,13 @@ class baseline::kmod (
     'rds',           # hl-kmod-011, CIS 3.2.4
     'sctp',          # hl-kmod-012, CIS 3.2.5
     'tipc',          # hl-kmod-013, CIS 3.2.6
+    # hl-kmod-015, CIS 3.1.2. Every Wi-Fi driver depends on cfg80211, and
+    # modprobe runs a dependency's install command too, so this one entry
+    # stops all of them loading whatever the kernel ships.
+    'cfg80211',
+    # hl-kmod-016, CIS 3.1.3: the Bluetooth core, which every Bluetooth
+    # driver (btusb, hci_uart) depends on. Same approach as cfg80211.
+    'bluetooth',
   ]
 
   # hl-kmod-014, CIS 1.1.1.11: every other filesystem module in the Debian 13

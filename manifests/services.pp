@@ -98,6 +98,7 @@ class baseline::services (
       'inetutils-ftp',
       'ftp-ssl',
     ],
+    'bluetooth'     => ['bluez'],               # hl-service-022, CIS 3.1.3
   }
 
   # Service => units to stop and mask.

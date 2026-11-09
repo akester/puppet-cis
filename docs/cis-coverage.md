@@ -42,8 +42,9 @@ confirmed yet.
 | 2.2 | Client services | Enforced | All six clients purged; per-host exceptions through `baseline::services::allow` (`ldap-client` on the domain controller). |
 | 2.3 | Time synchronization | Replaced | chrony on every host, configured in the control repo (`ntp`, `ntp::server`). The systemd-timesyncd rules (2.3.2) are N/A. |
 | 2.4 | Job schedulers (cron, at) | Enforced | 2.4.1 (cron) enforced by `baseline::cron`; only root can run `crontab`. 2.4.2 (at) enforced by `baseline::at`; root by default, other users per host in Hiera. |
-| 3.1.1 | IPv6 status | Enforced *(proposed)* | IPv6 stays on (Route64 tunnel, NPTv6, ULA). |
-| 3.1.2–3.1.3 | Wireless, Bluetooth | Undecided | |
+| 3.1.1 | IPv6 status | N/A | Manual rule. IPv6 stays enabled in the kernel; only some hosts use it. |
+| 3.1.2 | Wireless | Enforced | `cfg80211` denied by `baseline::kmod`, which stops every Wi-Fi driver. |
+| 3.1.3 | Bluetooth | Enforced | `bluez` purged by `baseline::services`; the `bluetooth` kernel module is denied too. |
 | 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6; 3.2.7 (manual review) undecided. |
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |

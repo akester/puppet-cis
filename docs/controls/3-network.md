@@ -5,6 +5,17 @@ section-level status is in [cis-coverage.md](../cis-coverage.md).
 
 ## Controls
 
+### Network devices (3.1)
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 3.1.1 | IPv6 status identified | enabled | N/A | `baseline::sysctl::manage_ipv6` | Manual rule. IPv6 stays enabled in the kernel everywhere; only some hosts are configured to use it. The 3.3.2 IPv6 sysctls are written either way. |
+| hl-kmod-015 | 3.1.2 | Wireless interfaces | `cfg80211` not loadable | Enforced | `baseline::kmod::allow` (`cfg80211`) | Denies cfg80211, which every Wi-Fi driver depends on, rather than listing each driver. See below. |
+| hl-service-022 | 3.1.3 | `bluez` package | purged | Enforced | `baseline::services::allow` (`bluetooth`) | In `baseline::services`. Also removes `pi-bluetooth` where it's installed. |
+| hl-kmod-016 | 3.1.3 | `bluetooth` module | not loadable | Enforced | `baseline::kmod::allow` (`bluetooth`) | Not required by CIS, which checks the package. The kernel side, same approach as cfg80211: every Bluetooth driver depends on it. |
+
+### Network kernel parameters (3.3)
+
 All 3.3 recommendations are Level 1 Server. They are written to
 `/etc/sysctl.d/60-baseline.conf` by `baseline::sysctl`, like the 1.5 sysctls.
 The IPv6 rows (027–034) are skipped when `baseline::sysctl::manage_ipv6` is
@@ -105,6 +116,19 @@ Keeps TIME_WAIT sockets alive when a reset arrives, instead of closing them
 early (TIME-WAIT assassination, RFC 1337). The security gain is small and the
 cost is negligible. It's kept because the fleet already runs it under
 os_hardening, so dropping it would be a behavior change for no benefit.
+
+### hl-kmod-015: wireless through cfg80211
+
+CIS's remediation writes an `install`/`blacklist` pair for every module under
+the running kernel's `drivers/net/wireless`, which changes with each kernel
+and differs on the Raspberry Pi kernel. Every Wi-Fi driver depends on
+cfg80211 instead, and modprobe runs a dependency's `install` command before
+loading the driver, so denying cfg80211 alone stops them all (checked with
+`modprobe --show-depends brcmfmac`).
+
+Like the other modules, it takes effect at the next boot: a Wi-Fi interface
+that's already up stays up until then, and the CIS audit, which looks at the
+driver of any wireless interface present, passes once it's gone.
 
 ### Not carried over from os_hardening
 

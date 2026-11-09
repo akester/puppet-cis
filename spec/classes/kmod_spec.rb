@@ -17,6 +17,8 @@ KMOD_DENIED = {
   'hl-kmod-011' => 'rds',
   'hl-kmod-012' => 'sctp',
   'hl-kmod-013' => 'tipc',
+  'hl-kmod-015' => 'cfg80211',
+  'hl-kmod-016' => 'bluetooth',
 }.freeze
 
 # hl-kmod-014 (CIS 1.1.1.11): unused filesystem modules.
