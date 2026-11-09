@@ -82,6 +82,12 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::at') }
       end
+
+      context 'with manage_ssh => false' do
+        let(:params) { { manage_ssh: false } }
+
+        it { is_expected.not_to contain_class('baseline::ssh') }
+      end
     end
   end
 end

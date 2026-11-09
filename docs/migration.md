@@ -52,6 +52,14 @@ whenever a ported feature leaves something behind that os_hardening created.
 - [ ] **cron:** only root is in `/etc/cron.allow`. Move any job that runs as
       another user (Puppet `cron` resources with a `user`) to a systemd timer
       (`cronjobs::job`) first.
+- [ ] **SSH:** `base::ssh` stops managing `openssh-server`, `/etc/ssh/sshd_config`
+      and `Service['ssh']` in the same change, or they're declared twice; its
+      `ssh` group stays. Proxmox hosts set
+      `baseline::ssh::permit_root_login: 'yes'` before the switch, or the
+      cluster loses root SSH between nodes. Hosts on another port move
+      `base::ssh::ports` to `baseline::ssh::ports`. Forwarding is off
+      (`DisableForwarding yes`); a host that needs SSH tunnels sets
+      `baseline::ssh::disable_forwarding: false`.
 - [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
       bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
@@ -68,7 +76,8 @@ whenever a ported feature leaves something behind that os_hardening created.
 | `enable_ipv6` | — | Dropped. IPv6 status is CIS 3.1.1, not ported yet. |
 | `enable_rpfilter`, `rpfilter_loose` | `baseline::sysctl::rp_filter` (1 or 2) | Not set anywhere today. |
 | `system_environment: lxc` | `baseline::manage_sysctl: false` | |
-| `harden::harden::tmpfs_size` | `baseline::mounts::tmp_size` | Not from os_hardening. Never overridden today. |
+| `harden::harden::tmpfs_size` | `baseline::mounts::tmp_size` |
+| `base::ssh::ports` | `baseline::ssh::ports` | Not from os_hardening. Never overridden today. |
 | `disable_filesystems` | — | Dropped; the list is fixed to CIS Level 1. Use `baseline::kmod::allow` to exempt. |
 
 ## After the first baseline run

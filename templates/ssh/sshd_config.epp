@@ -1,0 +1,66 @@
+<%- |
+  Array[Stdlib::Port] $ports,
+  Array[String[1]]    $allow_groups,
+  String[1]           $permit_root_login,
+  Boolean             $password_authentication,
+  Boolean             $disable_forwarding,
+  Array[String[1]]    $kex_algorithms,
+| -%>
+# Managed by Puppet (baseline::ssh). Local changes will be overwritten.
+#
+# There's no Include, so nothing in /etc/ssh/sshd_config.d is read: a drop-in
+# can't override these settings. Control IDs are in docs/controls/.
+
+<% $ports.each |$port| { -%>
+Port <%= $port %>
+<% } -%>
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Authentication
+PermitRootLogin <%= $permit_root_login %>
+PasswordAuthentication <%= if $password_authentication { 'yes' } else { 'no' } %>
+PubkeyAuthentication yes
+KbdInteractiveAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+IgnoreRhosts yes
+PermitEmptyPasswords no
+PermitUserEnvironment no
+UsePAM yes
+AllowGroups <%= $allow_groups.join(' ') %>
+
+# Forwarding
+DisableForwarding <%= if $disable_forwarding { 'yes' } else { 'no' } %>
+X11Forwarding no
+AllowAgentForwarding no
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Cryptography
+KexAlgorithms <%= $kex_algorithms.join(',') %>
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+# Timeouts and limits
+ClientAliveInterval 300
+ClientAliveCountMax 2
+LoginGraceTime 30
+MaxAuthTries 3
+MaxSessions 2
+MaxStartups 10:30:60
+
+Banner /etc/issue.net
+PrintMotd no
+UseDNS no
+
+# Allow the client to pass locale environment variables
+AcceptEnv LANG LC_*
+
+Subsystem sftp internal-sftp

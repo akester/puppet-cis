@@ -39,6 +39,9 @@
 # @param manage_at
 #   Limit `at` to the users in /etc/at.allow (baseline::at).
 #
+# @param manage_ssh
+#   Manage the OpenSSH server and its config (baseline::ssh).
+#
 # @param services_allow
 #   Services baseline::services leaves alone on this host, added to
 #   `baseline::services::allow`. For a profile that declares `baseline` and
@@ -58,6 +61,7 @@ class baseline (
   Boolean          $manage_services   = true,
   Boolean          $manage_cron       = true,
   Boolean          $manage_at         = true,
+  Boolean          $manage_ssh        = true,
   Array[String[1]] $services_allow    = [],
 ) {
   if $manage_sysctl {
@@ -102,5 +106,9 @@ class baseline (
 
   if $manage_at {
     contain baseline::at
+  }
+
+  if $manage_ssh {
+    contain baseline::ssh
   }
 }

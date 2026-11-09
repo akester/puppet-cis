@@ -1,0 +1,8 @@
+---
+baseline::ssh::ports:
+  - 22
+  - 2222
+baseline::ssh::permit_root_login: 'yes'
+baseline::ssh::disable_forwarding: false
+baseline::ssh::allow_groups:
+  - admins

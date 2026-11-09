@@ -47,8 +47,8 @@ confirmed yet.
 | 3.1.3 | Bluetooth | Enforced | `bluez` purged by `baseline::services`; the `bluetooth` kernel module is denied too. |
 | 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6 denied by `baseline::kmod`. 3.2.7 (manual) reviewed; nothing else to deny. |
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
-| 4.1 | Host firewall (ufw) | Replaced *(proposed)* | firewalld via `puppet/firewalld`. |
-| 5.1 | SSH server | Planned | Has to work with the existing 2FA setup. |
+| 4.1 | Host firewall (ufw) | Replaced | firewalld via `puppet/firewalld`, configured in the control repo (`harden::firewall`). |
+| 5.1 | SSH server | Enforced, with a per-host deviation | `baseline::ssh` owns all of `sshd_config`. Root logins allowed on Proxmox hosts (5.1.22). |
 | 5.2 | Privilege escalation (sudo, su) | Planned | |
 | 5.3 | PAM | Planned | `common-*` files are hand-edited; `pam-auth-update` profiles (5.3.2) may be replaced by managed files. |
 | 5.4 | User accounts and environment | Planned | |
@@ -70,6 +70,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | 3.3.1.1–3.3.1.3, 3.3.2.1–3.3.2.2 | IP forwarding | disabled | enabled on container hosts and K3s nodes | Router exception; [3-network.md](controls/3-network.md#deviations) |
 | 1.3.1.4, 1.5.3 | AppArmor and Yama sysctls | set | not set where the module isn't active | Raspberry Pi kernel; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-003-hl-sysctl-037-kernels-without-yama-or-apparmor) |
 | 2.1.1 | autofs | not installed | installed and running on hosts with network mounts | Static maps only; [2-services.md](controls/2-services.md#hl-service-001-autofs-for-static-network-mounts) |
+| 5.1.22 | PermitRootLogin | `no` | `yes` on Proxmox hosts | Cluster SSH as root; [5-access-control.md](controls/5-access-control.md#hl-ssh-022-root-logins-on-proxmox-hosts) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 
 ## Rationale
@@ -111,7 +112,11 @@ See the deviations in [3-network.md](controls/3-network.md#deviations).
 
 ### 4.1 Host firewall: firewalld instead of ufw
 
-_TODO_
+The benchmark only covers ufw. The fleet runs firewalld, managed from the
+control repo, which covers the same ground: firewall installed and running,
+incoming traffic dropped by default, and outgoing and routed traffic set by
+role. Zones and ports are site-specific, so none of it lives in the baseline.
+See [4-host-based-firewall.md](controls/4-host-based-firewall.md).
 
 ### 6.2 System auditing: Wazuh instead of the CIS auditd rule set
 

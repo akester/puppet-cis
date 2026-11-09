@@ -158,7 +158,7 @@ and `/etc/issue.net` (remote logins), and empties `/etc/motd`. Moved from
 | hl-banner-002 | 1.6.2 | `/etc/issue` content | warning text | Enforced | `baseline::banners::banner` | Getty escapes (`\m`, `\r`, `\s`, `\v`) are refused at compile time. |
 | hl-banner-003 | 1.6.3 | `/etc/issue.net` content | warning text | Enforced | `baseline::banners::banner` | Same text as `/etc/issue`. |
 | hl-banner-007 | 1.6.4 | pam_motd shows no system information | `/etc/update-motd.d/10-uname` absent | Enforced | `baseline::manage_banners` | Debian's sshd and login PAM show `/run/motd.dynamic`, rebuilt at each login; `10-uname` put `uname -snrvm` in it. |
-| — | 1.6.5 | sshd `Banner` | — | Monitored | — | Set by the site SSH config in the control repo; Wazuh SCA. |
+| hl-ssh-006 | 1.6.5 | sshd `Banner` | `/etc/issue.net` | Enforced | `baseline::manage_ssh` | Set by `baseline::ssh`; same control as 5.1.6. |
 | hl-banner-004 | 1.6.6 | `/etc/motd` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
 | hl-banner-005 | 1.6.7 | `/etc/issue` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
 | hl-banner-006 | 1.6.8 | `/etc/issue.net` ownership and mode | root:root `0644` | Enforced | `baseline::manage_banners` |  |
