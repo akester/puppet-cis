@@ -49,7 +49,7 @@ confirmed yet.
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced | firewalld via `puppet/firewalld`, configured in the control repo (`harden::firewall`). |
 | 5.1 | SSH server | Enforced, with per-host deviations | `baseline::ssh` owns all of `sshd_config`. Forwarding allowed on remote development hosts (5.1.9); root logins allowed on Proxmox hosts (5.1.22). |
-| 5.2 | Privilege escalation (sudo, su) | Planned | |
+| 5.2 | Privilege escalation (sudo, su) | Enforced | `baseline::sudo` owns `/etc/sudoers`; site grants stay in `sudoers.d`. `su` limited to root. 5.2.4 omitted (Level 2). |
 | 5.3 | PAM | Planned | `common-*` files are hand-edited; `pam-auth-update` profiles (5.3.2) may be replaced by managed files. |
 | 5.4 | User accounts and environment | Planned | |
 | 6.1 | System logging (journald, rsyslog, log files) | Planned | |

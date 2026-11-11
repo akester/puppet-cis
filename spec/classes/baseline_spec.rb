@@ -88,6 +88,12 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::ssh') }
       end
+
+      context 'with manage_sudo => false' do
+        let(:params) { { manage_sudo: false } }
+
+        it { is_expected.not_to contain_class('baseline::sudo') }
+      end
     end
   end
 end

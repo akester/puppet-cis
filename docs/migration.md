@@ -60,6 +60,12 @@ whenever a ported feature leaves something behind that os_hardening created.
       `base::ssh::ports` to `baseline::ssh::ports`. Forwarding is off
       (`DisableForwarding yes`); a host that needs SSH tunnels sets
       `baseline::ssh::disable_forwarding: false`.
+- [ ] **sudo:** remove `harden::rules::sudo` (with its sudoers template and
+      logrotate file) and `base::sudo` in the same change, or
+      `Package['sudo']`, `/etc/sudoers` and `/etc/logrotate.d/sudo` are
+      declared twice. `base::sudo_entry` stays; its `require base::sudo`
+      becomes `require => Package['sudo']`. After the switch only root can
+      `su`.
 - [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
       bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces

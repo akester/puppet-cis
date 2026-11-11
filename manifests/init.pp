@@ -42,6 +42,9 @@
 # @param manage_ssh
 #   Manage the OpenSSH server and its config (baseline::ssh).
 #
+# @param manage_sudo
+#   Manage sudo and /etc/sudoers, and limit su to root (baseline::sudo).
+#
 # @param services_allow
 #   Services baseline::services leaves alone on this host, added to
 #   `baseline::services::allow`. For a profile that declares `baseline` and
@@ -62,6 +65,7 @@ class baseline (
   Boolean          $manage_cron       = true,
   Boolean          $manage_at         = true,
   Boolean          $manage_ssh        = true,
+  Boolean          $manage_sudo       = true,
   Array[String[1]] $services_allow    = [],
 ) {
   if $manage_sysctl {
@@ -110,5 +114,9 @@ class baseline (
 
   if $manage_ssh {
     contain baseline::ssh
+  }
+
+  if $manage_sudo {
+    contain baseline::sudo
   }
 }

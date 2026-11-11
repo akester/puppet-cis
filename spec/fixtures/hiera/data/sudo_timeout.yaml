@@ -1,0 +1,2 @@
+---
+baseline::sudo::timestamp_timeout: 5

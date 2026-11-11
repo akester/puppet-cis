@@ -39,6 +39,27 @@ parameters: `ports` (default `[22]`) and `password_authentication` (default
 | hl-ssh-023 | 5.1.23 | `PermitUserEnvironment` | `no` | Enforced | `baseline::manage_ssh` |  |
 | hl-ssh-024 | 5.1.24 | `UsePAM` | `yes` | Enforced | `baseline::manage_ssh` |  |
 
+### Privilege escalation (5.2)
+
+`baseline::sudo` installs sudo, writes `/etc/sudoers`, and limits `su` to root
+(`baseline::manage_sudo => false` turns it off). `/etc/sudoers` is checked with
+`visudo -c` before it's written and still includes `/etc/sudoers.d`, where the
+control repo puts its grants (`base::sudo_entry`).
+
+Debian 13 keeps classic sudo. Its `sudo-rs` package installs alongside as
+`sudo-rs` and doesn't replace `sudo`. On Ubuntu 25.10 and later, where sudo-rs
+is `sudo`, the `logfile` line is left out and sudo logs to syslog only.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-sudo-001 | 5.2.1 | sudo installed | `sudo` | Enforced | `baseline::manage_sudo` |  |
+| hl-sudo-002 | 5.2.2 | `Defaults use_pty` | set | Enforced | `baseline::manage_sudo` |  |
+| hl-sudo-003 | 5.2.3 | `Defaults logfile` | `/var/log/sudo.log` | Enforced | `baseline::manage_sudo` | Rotated daily, five kept (`/etc/logrotate.d/sudo`). |
+| — | 5.2.4 | No `NOPASSWD` | — | Omitted | — | Level 2. Service grants in `sudoers.d` use `NOPASSWD`. |
+| hl-sudo-004 | 5.2.5 | No `!authenticate` | not set | Enforced | `baseline::manage_sudo` | Not in `/etc/sudoers`; `base::sudo_entry` can't write it. |
+| hl-sudo-005 | 5.2.6 | `Defaults timestamp_timeout` | `15` | Enforced | `baseline::sudo::timestamp_timeout` | 0 to 15. |
+| hl-sudo-006 | 5.2.7 | `su` restricted | `pam_wheel.so use_uid group=sugroup` | Enforced | `baseline::manage_sudo` | `sugroup` is empty, so only root can `su`; use `sudo -i` instead. |
+
 ## Deviations
 
 ### hl-ssh-001: no drop-ins

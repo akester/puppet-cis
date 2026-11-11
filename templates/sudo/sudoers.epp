@@ -1,0 +1,33 @@
+<%- |
+  Integer[0, 15] $timestamp_timeout,
+  Boolean        $logfile,
+| -%>
+# Managed by Puppet (baseline::sudo). Local changes will be overwritten.
+#
+# Site grants go in /etc/sudoers.d. Control IDs are in docs/controls/.
+#
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Run commands in a pseudo-terminal, so a backgrounded process can't inject
+# input into the user's terminal after sudo exits.
+Defaults        use_pty
+
+# Minutes before sudo asks for the password again
+Defaults        timestamp_timeout=<%= $timestamp_timeout %>
+
+<% if $logfile { -%>
+# Log commands to their own file as well as syslog
+Defaults        logfile="/var/log/sudo.log"
+<% } else { -%>
+# sudo-rs has no logfile setting; it logs to syslog (auth.log) only
+<% } -%>
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+@includedir /etc/sudoers.d
