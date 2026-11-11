@@ -48,7 +48,7 @@ confirmed yet.
 | 3.2 | Network kernel modules | Enforced | 3.2.1–3.2.6 denied by `baseline::kmod`. 3.2.7 (manual) reviewed; nothing else to deny. |
 | 3.3 | Network kernel parameters | Enforced, with per-host deviations | All rules enforced. Forwarding and no `log_martians` on container hosts; see [3-network.md](controls/3-network.md). |
 | 4.1 | Host firewall (ufw) | Replaced | firewalld via `puppet/firewalld`, configured in the control repo (`harden::firewall`). |
-| 5.1 | SSH server | Enforced, with a per-host deviation | `baseline::ssh` owns all of `sshd_config`. Root logins allowed on Proxmox hosts (5.1.22). |
+| 5.1 | SSH server | Enforced, with per-host deviations | `baseline::ssh` owns all of `sshd_config`. Forwarding allowed on remote development hosts (5.1.9); root logins allowed on Proxmox hosts (5.1.22). |
 | 5.2 | Privilege escalation (sudo, su) | Planned | |
 | 5.3 | PAM | Planned | `common-*` files are hand-edited; `pam-auth-update` profiles (5.3.2) may be replaced by managed files. |
 | 5.4 | User accounts and environment | Planned | |
@@ -71,6 +71,7 @@ otherwise enforced (a different value, a per-role exception, and so on).
 | 1.3.1.4 | Unconfined AppArmor restriction | `1` | `0` on K3s nodes | Breaks container processes; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-037-unconfined-apparmor-restriction-off-on-k3s-nodes) |
 | 1.3.1.4, 1.5.3 | AppArmor and Yama sysctls | set | not set where the module isn't active | Raspberry Pi kernel; [1-initial-setup.md](controls/1-initial-setup.md#hl-sysctl-003-hl-sysctl-037-kernels-without-yama-or-apparmor) |
 | 2.1.1 | autofs | not installed | installed and running on hosts with network mounts | Static maps only; [2-services.md](controls/2-services.md#hl-service-001-autofs-for-static-network-mounts) |
+| 5.1.9 | DisableForwarding | `yes` | `no` on remote development hosts | Editor port forwards; [5-access-control.md](controls/5-access-control.md#hl-ssh-009-forwarding-on-remote-development-hosts) |
 | 5.1.22 | PermitRootLogin | `no` | `yes` on Proxmox hosts | Cluster SSH as root; [5-access-control.md](controls/5-access-control.md#hl-ssh-022-root-logins-on-proxmox-hosts) |
 | 3.3.1.16–3.3.1.17 | log_martians | `1` | `0` on forwarding hosts | [3-network.md](controls/3-network.md#deviations) |
 

@@ -22,7 +22,7 @@ parameters: `ports` (default `[22]`) and `password_authentication` (default
 | hl-ssh-006 | 5.1.6 | `Banner` | `/etc/issue.net` | Enforced | `baseline::manage_ssh` | The file comes from `baseline::banners`. Covers 1.6.5 too. |
 | hl-ssh-007 | 5.1.7 | `Ciphers` | chacha20-poly1305, aes256/128-gcm, aes256-ctr | Enforced | `baseline::manage_ssh` | An explicit list, rather than CIS's subtractive form. |
 | hl-ssh-008 | 5.1.8 | `ClientAliveInterval`, `ClientAliveCountMax` | `300`, `2` | Enforced | `baseline::manage_ssh` |  |
-| hl-ssh-009 | 5.1.9 | `DisableForwarding` | `yes` | Enforced | `baseline::ssh::disable_forwarding` | `X11Forwarding no` stays set when this is turned off. |
+| hl-ssh-009 | 5.1.9 | `DisableForwarding` | `yes` | Enforced | `baseline::ssh::disable_forwarding` | `X11Forwarding no` stays set when this is turned off. Off on remote development hosts; see below. |
 | hl-ssh-010 | 5.1.10 | `GSSAPIAuthentication` | `no` | Enforced | `baseline::manage_ssh` | Already Debian's default; now explicit. |
 | hl-ssh-011 | 5.1.11 | `HostbasedAuthentication` | `no` | Enforced | `baseline::manage_ssh` | Already Debian's default; now explicit. |
 | hl-ssh-012 | 5.1.12 | `IgnoreRhosts` | `yes` | Enforced | `baseline::manage_ssh` |  |
@@ -50,6 +50,14 @@ install one (cloud-init's can set `PasswordAuthentication yes`). The baseline
 writes the whole of `sshd_config` instead, with no `Include`, so nothing can
 override these settings by accident. The CIS audits read `sshd -T`, so they
 see the same values either way.
+
+### hl-ssh-009: forwarding on remote development hosts
+
+Hosts used for remote development set
+`baseline::ssh::disable_forwarding: false`. Editors that run a server on the
+host (VS Code Remote-SSH, for one) reach it through an SSH port forward, so
+forwarding has to be on there. X11 forwarding stays off. Every other host keeps
+`DisableForwarding yes`.
 
 ### hl-ssh-022: root logins on Proxmox hosts
 

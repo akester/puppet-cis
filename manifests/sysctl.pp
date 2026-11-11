@@ -38,7 +38,7 @@
 #
 # @api private
 class baseline::sysctl (
-  Stdlib::Absolutepath $target          = '/etc/sysctl.d/60-baseline.conf',
+  Stdlib::Absolutepath $target                       = '/etc/sysctl.d/60-baseline.conf',
   Integer[1, 2]        $ptrace_scope                 = 2,
   Boolean              $apparmor_restrict_unconfined = true,
   Boolean              $ipv4_forwarding              = false,
