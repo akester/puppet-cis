@@ -94,6 +94,12 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::sudo') }
       end
+
+      context 'with manage_pam => false' do
+        let(:params) { { manage_pam: false } }
+
+        it { is_expected.not_to contain_class('baseline::pam') }
+      end
     end
   end
 end

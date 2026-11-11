@@ -1,0 +1,3 @@
+---
+baseline::pam::faillock_deny: 3
+baseline::pam::faillock_unlock_time: 0

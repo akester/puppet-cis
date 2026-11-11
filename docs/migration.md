@@ -66,6 +66,17 @@ whenever a ported feature leaves something behind that os_hardening created.
       declared twice. `base::sudo_entry` stays; its `require base::sudo`
       becomes `require => Package['sudo']`. After the switch only root can
       `su`.
+- [ ] **PAM:** every host has had `pam-reset.sh --apply` run (no `tally2`
+      profile left in `/usr/share/pam-configs`, `common-*` not hand-edited).
+      `baseline::pam` reruns pam-auth-update, which would put an enabled
+      `tally2` back in the stack, and `pam_tally2.so` doesn't exist on trixie.
+      Don't run the script after the switch: it would remove the baseline's
+      profiles and restore `nullok`. Drop `harden::rules::pam_reset` in the
+      same change.
+- [ ] **homelab-maint:** its password field is `*`, not empty (the control
+      repo's `base::maint_user`). Check with
+      `awk -F: 'length($2)==0 {print $1}' /etc/shadow`, which should print
+      nothing.
 - [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
       bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces
@@ -97,8 +108,6 @@ whenever a ported feature leaves something behind that os_hardening created.
       over" in [3-network.md](controls/3-network.md)).
 - [ ] **Kernel modules:** remove os_hardening's `/etc/modprobe.d/dev-sec.conf`
       (handled in the control repo, not by the baseline).
-- [ ] **PAM:** remove `/usr/share/pam-configs/tally2` (pam_tally2 no longer
-      exists; see the migration brief §2).
 
 ## Verify
 

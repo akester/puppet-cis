@@ -60,6 +60,102 @@ is `sudo`, the `logfile` line is left out and sudo logs to syslog only.
 | hl-sudo-005 | 5.2.6 | `Defaults timestamp_timeout` | `15` | Enforced | `baseline::sudo::timestamp_timeout` | 0 to 15. |
 | hl-sudo-006 | 5.2.7 | `su` restricted | `pam_wheel.so use_uid group=sugroup` | Enforced | `baseline::manage_sudo` | `sugroup` is empty, so only root can `su`; use `sudo -i` instead. |
 
+### PAM (5.3)
+
+`baseline::pam` (`baseline::manage_pam => false` turns it off) never edits
+`/etc/pam.d/common-*`. pam-auth-update builds those from the profiles in
+`/usr/share/pam-configs`, and stops updating any it finds locally modified. The
+baseline manages the profiles and the modules' own config files instead.
+
+#### Packages (5.3.1)
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-001 | 5.3.1.1 | `libpam-runtime` | installed | Enforced | `baseline::manage_pam` | Kept current by unattended-upgrades (control repo, CIS 1.2.2), not Puppet. |
+| hl-pam-002 | 5.3.1.2 | `libpam-modules` | installed | Enforced | `baseline::manage_pam` | As above. |
+| hl-pam-003 | 5.3.1.3 | `libpam-pwquality` | installed | Enforced | `baseline::manage_pam` | As above. Its install enables the `pwquality` profile with the module's defaults until 5.3.3.2 sets them. |
+| hl-pam-004 | 5.3.1.4 | `cracklib-runtime` | installed | Enforced | `baseline::manage_pam` | As above. |
+
+#### pam-auth-update profiles (5.3.2)
+
+The baseline writes the `faillock`, `faillock_notify` and `pwhistory` profiles
+as CIS gives them; `unix` and `pwquality` come with their packages. When a
+profile or one of the packages changes, `pam-auth-update --enable` turns on all
+five and rewrites `common-*`. It runs without prompts and keeps any local
+changes to `common-*` rather than forcing over them. It only runs on a change,
+so a profile disabled by hand afterwards stays off until the next change; the
+Wazuh checks catch that.
+
+Profiles with the same priority are ordered in reverse name order, so
+`pwquality` comes before `pwhistory`, whose `use_authtok` takes the password
+pwquality has already checked.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-005 | 5.3.2.1 | `unix` profile | enabled | Enforced | `baseline::manage_pam` | Enabled by default; the baseline re-enables it with the others. |
+| hl-pam-006 | 5.3.2.2 | `faillock`, `faillock_notify` profiles | enabled | Enforced | `baseline::manage_pam` | Values in `/etc/security/faillock.conf` (5.3.3.1). |
+| hl-pam-007 | 5.3.2.3 | `pwquality` profile | enabled | Enforced | `baseline::manage_pam` | Shipped by `libpam-pwquality`. |
+| hl-pam-008 | 5.3.2.4 | `pwhistory` profile | enabled, `use_authtok` | Enforced | `baseline::manage_pam` | Options are in `/etc/security/pwhistory.conf` (5.3.3.3), which CIS prefers to arguments on the line. |
+
+#### pam_faillock (5.3.3.1)
+
+`/etc/security/faillock.conf` is managed whole. The profiles pass pam_faillock
+no arguments, so its values apply. `faillock --user <name> --reset` unlocks an
+account early. Key-based SSH logins don't go through the PAM auth stack, so
+they're never counted or locked out.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-009 | 5.3.3.1.1 | `deny` | `5` | Enforced | `baseline::pam::faillock_deny` | 1 to 5. |
+| hl-pam-010 | 5.3.3.1.2 | `unlock_time` | `900` | Enforced | `baseline::pam::faillock_unlock_time` | 0 (never) or 900 to 604800 seconds. |
+| — | 5.3.3.1.3 | Lockout includes root | — | Omitted | — | Level 2. Root stays exempt, so a lockout can't shut out the console. |
+
+#### pam_pwquality (5.3.3.2)
+
+The values are in `/etc/security/pwquality.conf.d/50-baseline.conf`. The
+`pwquality` profile sets nothing beyond `retry=3`, and the package's own
+`pwquality.conf` is all comments, so they apply. They only affect new
+passwords; existing ones keep working until they're changed.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-011 | 5.3.3.2.1 | `difok` | `2` | Enforced | `baseline::manage_pam` |  |
+| hl-pam-012 | 5.3.3.2.2 | `minlen` | `14` | Enforced | `baseline::pam::pwquality_minlen` | 14 or more. |
+| — | 5.3.3.2.3 | Complexity | no `minclass`; credits `0` | Monitored | — | Manual. Length and the dictionary check stand in for character classes; no credit is above 0, which CIS requires. |
+| hl-pam-013 | 5.3.3.2.4 | `maxrepeat` | `3` | Enforced | `baseline::manage_pam` |  |
+| hl-pam-014 | 5.3.3.2.5 | `maxsequence` | `3` | Enforced | `baseline::manage_pam` |  |
+| hl-pam-015 | 5.3.3.2.6 | `dictcheck` | `1` | Enforced | `baseline::manage_pam` | The default; now explicit. |
+| hl-pam-016 | 5.3.3.2.7 | `enforcing` | `1` | Enforced | `baseline::manage_pam` | The default; now explicit. |
+| hl-pam-017 | 5.3.3.2.8 | `enforce_for_root` | set | Enforced | `baseline::manage_pam` | Applies when root changes a password, its own or another user's. |
+
+#### pam_pwhistory (5.3.3.3)
+
+`/etc/security/pwhistory.conf` is managed whole; CIS prefers it to arguments on
+the module line, and the `pwhistory` profile carries only `use_authtok`. The
+history is kept in `/etc/security/opasswd`, which 7.1 covers.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-018 | 5.3.3.3.1 | `remember` | `24` | Enforced | `baseline::pam::pwhistory_remember` | 24 or more. |
+| hl-pam-019 | 5.3.3.3.2 | `enforce_for_root` | set | Enforced | `baseline::manage_pam` |  |
+| hl-pam-008 | 5.3.3.3.3 | `use_authtok` | set | Enforced | `baseline::manage_pam` | On the `pwhistory` profile line (5.3.2.4). |
+
+#### pam_unix (5.3.3.4)
+
+The baseline writes `/usr/share/pam-configs/unix`, libpam-runtime's profile with
+`nullok` removed and everything else as shipped; CIS audits the profile itself,
+so a separate profile wouldn't do. A libpam-runtime upgrade puts the stock file
+back and reruns pam-auth-update, so `nullok` returns until the next Puppet run
+restores the file. That only matters for an account with an empty password,
+and there shouldn't be any.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-pam-020 | 5.3.3.4.1 | `nullok` | not set | Enforced | `baseline::manage_pam` | Accounts with an empty password field can't log in. |
+| hl-pam-021 | 5.3.3.4.2 | `remember` | not set | Enforced | `baseline::manage_pam` | History is pam_pwhistory's (5.3.3.3). |
+| hl-pam-022 | 5.3.3.4.3 | Hashing algorithm | `yescrypt` | Enforced | `baseline::manage_pam` | Debian's default. |
+| hl-pam-023 | 5.3.3.4.4 | `use_authtok` | set | Enforced | `baseline::manage_pam` | On the `Password:` line, which pam-auth-update uses once pwquality is ahead of pam_unix. |
+
 ## Deviations
 
 ### hl-ssh-001: no drop-ins

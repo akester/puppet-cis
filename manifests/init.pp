@@ -45,6 +45,10 @@
 # @param manage_sudo
 #   Manage sudo and /etc/sudoers, and limit su to root (baseline::sudo).
 #
+# @param manage_pam
+#   Manage PAM packages, pam-auth-update profiles and module options
+#   (baseline::pam).
+#
 # @param services_allow
 #   Services baseline::services leaves alone on this host, added to
 #   `baseline::services::allow`. For a profile that declares `baseline` and
@@ -66,6 +70,7 @@ class baseline (
   Boolean          $manage_at         = true,
   Boolean          $manage_ssh        = true,
   Boolean          $manage_sudo       = true,
+  Boolean          $manage_pam        = true,
   Array[String[1]] $services_allow    = [],
 ) {
   if $manage_sysctl {
@@ -118,5 +123,9 @@ class baseline (
 
   if $manage_sudo {
     contain baseline::sudo
+  }
+
+  if $manage_pam {
+    contain baseline::pam
   }
 }
