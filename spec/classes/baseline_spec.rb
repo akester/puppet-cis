@@ -100,6 +100,18 @@ describe 'baseline' do
 
         it { is_expected.not_to contain_class('baseline::pam') }
       end
+
+      context 'with manage_accounts => false' do
+        let(:params) { { manage_accounts: false } }
+
+        it { is_expected.not_to contain_class('baseline::accounts') }
+      end
+
+      context 'with manage_environment => false' do
+        let(:params) { { manage_environment: false } }
+
+        it { is_expected.not_to contain_class('baseline::environment') }
+      end
     end
   end
 end

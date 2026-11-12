@@ -77,6 +77,22 @@ whenever a ported feature leaves something behind that os_hardening created.
       repo's `base::maint_user`). Check with
       `awk -F: 'length($2)==0 {print $1}' /etc/shadow`, which should print
       nothing.
+- [ ] **Shell timeout:** remove `harden::rules::auto_logout` and
+      `harden::harden`'s `enforce_auto_logout` in the same change. The
+      baseline removes TMOUT lines from `/etc/profile` and `/etc/bash.bashrc`
+      and sets it once in `profile.d`; left in, the old class would put them
+      back each run. The timeout goes from 600 to 900 seconds unless
+      `baseline::environment::tmout: 600` is set.
+- [ ] **Login shells:** the baseline sets `nologin` on system accounts
+      (UID below `UID_MIN`) and locks accounts without a login shell. Hosts
+      whose system accounts need a shell list them in
+      `baseline::accounts::shell_allow` before the switch:
+      - GitLab server (omnibus): `git`, or `git` over SSH stops working.
+      - GitLab runner hosts: `gitlab-runner`.
+
+      To find others, list the system accounts that still have a login
+      shell with
+      `awk -F: '$3 < 1000 && $1 !~ /^(root|sync|shutdown|halt)$/ && $7 !~ /nologin|false/ {print $1, $7}' /etc/passwd`.
 - [ ] **avahi:** the baseline purges `avahi-daemon`. Any container that
       bind-mounts its socket gets an empty directory there instead.
 - [ ] LXC nodes: `harden::harden` passes `manage_sysctl => false` (replaces

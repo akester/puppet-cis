@@ -51,7 +51,7 @@ confirmed yet.
 | 5.1 | SSH server | Enforced, with per-host deviations | `baseline::ssh` owns all of `sshd_config`. Forwarding allowed on remote development hosts (5.1.9); root logins allowed on Proxmox hosts (5.1.22). |
 | 5.2 | Privilege escalation (sudo, su) | Enforced | `baseline::sudo` owns `/etc/sudoers`; site grants stay in `sudoers.d`. `su` limited to root. 5.2.4 omitted (Level 2). |
 | 5.3 | PAM | Enforced | Packages (5.3.1), pam-auth-update profiles (5.3.2) and module options (5.3.3) enforced; package upgrades via unattended-upgrades. `common-*` are left to pam-auth-update; the baseline manages the profiles and the modules' config files. Root isn't locked out (5.3.3.1.3, Level 2); complexity (5.3.3.2.3, Manual) is left to length and the dictionary check. |
-| 5.4 | User accounts and environment | Planned | |
+| 5.4 | User accounts and environment | Enforced, with deviations | 5.4.1 (password ageing) enforced by `baseline::accounts`, except the inactive lock on existing accounts (5.4.1.5, a deviation): an expired password forces a change but never locks the account. 5.4.1.2 omitted (Level 2); 5.4.1.6 monitored. 5.4.2 enforced, with per-host allow lists for system accounts that need a shell (5.4.2.7); the UID/GID checks and root's `PATH` are monitored. 5.4.3 enforced by `baseline::environment` (TMOUT, umask 027); 5.4.3.1 omitted (Level 2). |
 | 6.1 | System logging (journald, rsyslog, log files) | Planned | |
 | 6.2 | System auditing (auditd) | Replaced | Wazuh. _TODO: will auditd rules still be deployed as a Wazuh data source?_ |
 | 6.3 | Integrity checking (AIDE) | Replaced | Wazuh file integrity monitoring. |

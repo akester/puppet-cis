@@ -1,0 +1,7 @@
+---
+baseline::accounts::pass_max_days: 90
+baseline::accounts::pass_warn_age: 14
+baseline::accounts::inactive: 30
+baseline::accounts::shell_allow:
+  - git
+  - gitlab-runner

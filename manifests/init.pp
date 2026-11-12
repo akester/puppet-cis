@@ -49,6 +49,13 @@
 #   Manage PAM packages, pam-auth-update profiles and module options
 #   (baseline::pam).
 #
+# @param manage_accounts
+#   Manage password ageing defaults and existing accounts' ageing
+#   (baseline::accounts).
+#
+# @param manage_environment
+#   Manage the shell idle timeout and default umask (baseline::environment).
+#
 # @param services_allow
 #   Services baseline::services leaves alone on this host, added to
 #   `baseline::services::allow`. For a profile that declares `baseline` and
@@ -57,21 +64,23 @@
 # @example
 #   include baseline
 class baseline (
-  Boolean          $manage_sysctl     = true,
-  Boolean          $manage_kmod       = true,
-  Boolean          $manage_mounts     = true,
-  Boolean          $manage_apt        = true,
-  Boolean          $manage_apparmor   = true,
-  Boolean          $manage_bootloader = true,
-  Boolean          $manage_process    = true,
-  Boolean          $manage_banners    = true,
-  Boolean          $manage_services   = true,
-  Boolean          $manage_cron       = true,
-  Boolean          $manage_at         = true,
-  Boolean          $manage_ssh        = true,
-  Boolean          $manage_sudo       = true,
-  Boolean          $manage_pam        = true,
-  Array[String[1]] $services_allow    = [],
+  Boolean          $manage_sysctl      = true,
+  Boolean          $manage_kmod        = true,
+  Boolean          $manage_mounts      = true,
+  Boolean          $manage_apt         = true,
+  Boolean          $manage_apparmor    = true,
+  Boolean          $manage_bootloader  = true,
+  Boolean          $manage_process     = true,
+  Boolean          $manage_banners     = true,
+  Boolean          $manage_services    = true,
+  Boolean          $manage_cron        = true,
+  Boolean          $manage_at          = true,
+  Boolean          $manage_ssh         = true,
+  Boolean          $manage_sudo        = true,
+  Boolean          $manage_pam         = true,
+  Boolean          $manage_accounts    = true,
+  Boolean          $manage_environment = true,
+  Array[String[1]] $services_allow     = [],
 ) {
   if $manage_sysctl {
     contain baseline::sysctl
@@ -127,5 +136,13 @@ class baseline (
 
   if $manage_pam {
     contain baseline::pam
+  }
+
+  if $manage_accounts {
+    contain baseline::accounts
+  }
+
+  if $manage_environment {
+    contain baseline::environment
   }
 }

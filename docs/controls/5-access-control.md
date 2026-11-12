@@ -156,6 +156,74 @@ and there shouldn't be any.
 | hl-pam-022 | 5.3.3.4.3 | Hashing algorithm | `yescrypt` | Enforced | `baseline::manage_pam` | Debian's default. |
 | hl-pam-023 | 5.3.3.4.4 | `use_authtok` | set | Enforced | `baseline::manage_pam` | On the `Password:` line, which pam-auth-update uses once pwquality is ahead of pam_unix. |
 
+### User accounts (5.4)
+
+#### Password ageing (5.4.1)
+
+`baseline::accounts` (`baseline::manage_accounts => false` turns it off) sets
+the defaults in `/etc/login.defs` and `/etc/default/useradd`, which only apply
+to accounts created afterwards. Accounts that already have a password hash are
+brought into line with `chage`; locked (`!`) and key-only (`*`) accounts have
+no password to expire and are left alone.
+
+An expired password doesn't lock the account. The next interactive login,
+whether by password or SSH key, and the next `sudo`, ask for a new one first.
+Logins without a terminal (`ssh host command`) and `sudo` from scripts,
+`NOPASSWD` grants included, fail until it's changed. Passwords aren't shared
+between hosts, so each host's clock runs on its own. When the baseline first
+applies, a password last changed more than `pass_max_days` ago expires at
+once.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| hl-acct-001 | 5.4.1.1 | `PASS_MAX_DAYS` (login.defs) | `365` | Enforced | `baseline::accounts::pass_max_days` | 1 to 365. |
+| hl-acct-002 | 5.4.1.1 | Maximum age, existing accounts | `365` | Enforced | `baseline::accounts::pass_max_days` | `chage --maxdays` on accounts above the limit or without one. |
+| — | 5.4.1.2 | `PASS_MIN_DAYS` | — | Omitted | — | Level 2. |
+| hl-acct-003 | 5.4.1.3 | `PASS_WARN_AGE` (login.defs) | `7` | Enforced | `baseline::accounts::pass_warn_age` | 7 or more. |
+| hl-acct-004 | 5.4.1.3 | Warning days, existing accounts | `7` | Enforced | `baseline::accounts::pass_warn_age` | `chage --warndays` on accounts below 7; higher values are kept. |
+| hl-acct-005 | 5.4.1.4 | `ENCRYPT_METHOD` | `YESCRYPT` | Enforced | `baseline::manage_accounts` | Group passwords only; pam_unix hashes user passwords with yescrypt too (hl-pam-022). |
+| hl-acct-006 | 5.4.1.5 | `INACTIVE` (useradd default) | `45` | Enforced | `baseline::accounts::inactive` | 0 to 45. New accounts only. |
+| hl-acct-007 | 5.4.1.5 | Inactive period, existing accounts | unchanged | Omitted | — | Deliberately left as is; see [hl-acct-007](#hl-acct-007-no-inactive-lock-on-existing-accounts). |
+| — | 5.4.1.6 | Last change date in the past | — | Monitored | — | Nothing sets a future date. Fixing one needs a person to decide between resetting and expiring it. |
+
+#### Root and system accounts (5.4.2)
+
+The UID and GID checks are left to the audit: fixing one means renumbering an
+account and re-owning its files, which needs a person. The rest are the CIS
+remediations, run only when an account is out of line. Valid shells are the
+ones in `/etc/shells` other than `nologin`, as CIS counts them.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 5.4.2.1 | Only root has UID 0 | — | Monitored | — |  |
+| — | 5.4.2.2 | Only root has GID 0 as its primary group | — | Monitored | — | Supplementary members of the `root` group aren't covered. |
+| — | 5.4.2.3 | Only the `root` group has GID 0 | — | Monitored | — |  |
+| hl-acct-008 | 5.4.2.4 | Root has a password or is locked | locked if empty | Enforced | `baseline::manage_accounts` | `usermod -L root` only when root's password field is empty. A set password, such as Proxmox's `root@pam`, is kept. |
+| — | 5.4.2.5 | Root's `PATH` | — | Monitored | — | Debian's default, which nothing in the fleet changes. CIS gives no fix beyond correcting or justifying it. |
+| hl-acct-009 | 5.4.2.6 | Root's umask | no `umask` in `/root/.profile` or `/root/.bashrc` | Enforced | `baseline::manage_accounts` | Root gets the system default (5.4.3.3). Commented lines stay. |
+| hl-acct-010 | 5.4.2.7 | System accounts' shell | `/usr/sbin/nologin` | Enforced | `baseline::accounts::shell_allow` | Accounts below `UID_MIN` and `nobody`, except root, `halt`, `sync`, `shutdown` and the allow list. A service that runs commands through its account's shell (GitLab's `git` over SSH) goes on the allow list. |
+| hl-acct-011 | 5.4.2.8 | Accounts without a valid shell | locked | Enforced | `baseline::manage_accounts` | `usermod -L` on non-root accounts whose password isn't already `!` or `*`. |
+
+#### User environment (5.4.3)
+
+`baseline::environment` (`baseline::manage_environment => false` turns it off)
+sets the idle timeout and umask for login shells. Services started by systemd
+keep their own umask.
+
+TMOUT is set once, in `/etc/profile.d/50-tmout.sh`: setting a readonly TMOUT
+again in the same shell is an error at every login, so the baseline removes
+TMOUT lines from `/etc/profile` and `/etc/bash.bashrc`. It uses plain
+`readonly` and `export` rather than CIS's `typeset -xr`, which dash, reading
+`profile.d` as a login shell, doesn't have.
+
+| ID | CIS | Setting | Value | Status | Parameter | Notes |
+|---|---|---|---|---|---|---|
+| — | 5.4.3.1 | `nologin` not in `/etc/shells` | — | Omitted | — | Level 2. |
+| hl-env-001 | 5.4.3.2 | `TMOUT` | `900`, readonly, exported | Enforced | `baseline::environment::tmout` | 1 to 900 seconds. |
+| hl-env-002 | 5.4.3.3 | umask in `profile.d` | `027` | Enforced | `baseline::manage_environment` | `/etc/profile.d/60-default_umask.sh`. |
+| hl-env-003 | 5.4.3.3 | `UMASK` (login.defs) | `027` | Enforced | `baseline::manage_environment` | Used by pam_umask and for new home directories. |
+| hl-env-004 | 5.4.3.3 | Weaker umasks | commented out | Enforced | `baseline::manage_environment` | In `/etc/profile` and `/etc/profile.d/*.sh`, using the CIS audit's pattern. It also flags four-digit masks such as `0077`; write `077`. |
+
 ## Deviations
 
 ### hl-ssh-001: no drop-ins
@@ -182,3 +250,15 @@ Proxmox hosts set `baseline::ssh::permit_root_login: 'yes'`. A Proxmox cluster
 logs in to its own nodes as root over SSH (migration, replication, the web
 console's shell), so it can't be turned off there. Everywhere else root can't
 log in over SSH.
+
+### hl-acct-007: no inactive lock on existing accounts
+
+CIS also sets an inactive period of 45 days or less on every existing account
+with a password. Once a password has been expired that long without being
+changed, pam_unix refuses the account for every login that goes through PAM,
+SSH keys and `sudo` included. Each host keeps its own password and clock, so a
+host nobody logged in to for `pass_max_days` + 45 days would shut out its
+admin account, leaving only Puppet or a rescue boot. Existing accounts keep
+their inactive period (Debian's default is none): an expired password still
+forces a change at the next login, but never locks the account. Accounts
+created afterwards get the useradd default (hl-acct-006).
